@@ -1,0 +1,10 @@
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+ExtendableGrids = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
+ExtendableSparse = "95c220a8-a1cf-11e9-0c77-dbfce5f500b3"
+GridVisualize = "5eed8a63-0fb0-45eb-886d-8d5a387d12b8"
+ILUZero = "88f59080-6952-5380-9ea5-54057fb9a43f"
+LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
+SimplexGridFactory = "57bfcd06-606e-45d6-baf4-4ba06da0efd5"
+Triangulate = "f7e6ffb2-c36d-4f8f-a77e-16e897189344"
+VoronoiFVM = "82b139dc-5afc-11e9-35da-9b9bdfd336f3"
