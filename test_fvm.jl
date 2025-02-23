@@ -26,7 +26,7 @@ include("constants.jl")
     #anion_size::Float64 = 1e-10 # cation size [meter]
     D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
     D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
-    surface_potential::Float64 = 0.3 # surface potential [V]
+    surface_potential::Float64 = 0.1 # surface potential [V]
     #c_0::Float64 = 1 # initial concentration [mol/L]
     #max_iter::Int = 20 # maximum nonlinear Newton iterations 
     #dt::Float64 = 1e-6 # timestep
@@ -97,6 +97,13 @@ function generate_grid(parameters)
     return grid
 end
 
+function generate_1d_grid(parameters)
+    # first, we normalize the geometry inputs
+    r = parameters.pore_radius / parameters.pore_radius
+    X = collect(0:0.001:r)
+    return simplexgrid(X)
+end
+
 """
     get_initial_timestep_system(config)
 
@@ -122,8 +129,8 @@ function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 2, 0)
+    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
     # we set the inital potential distribution to zero
     inival = unknowns(sys)
     inival .= 0
@@ -176,14 +183,14 @@ function get_time_dependent_system_with_boundary_conditions(grid, initial_potent
     enable_species!(sys, 3, [1]) # add cation
     # potential boundary conditions
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 2, 0)
+    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
     # anion boundary conditions
-    boundary_dirichlet!(sys, 2, 1, 1.0)
-    #boundary_dirichlet!(sys, 2, 4, 0.0)
-    # cation boundary conditions
-    boundary_dirichlet!(sys, 3, 1, 1.0)
-    #boundary_dirichlet!(sys, 3, 4, 0.0)
+    #boundary_neumann!(sys, 2, 1, 0.0)
+    boundary_dirichlet!(sys, 2, 2, 1.0)
+    # cation bounda ry conditions
+    #boundary_neumann!(sys, 3, 1, 0.0)
+    boundary_dirichlet!(sys, 3, 2, 1.0)
     U = unknowns(sys)
     U[1, :] = initial_potential
     U[2, :] .= 1.0
@@ -201,7 +208,7 @@ function main(;
     parameters = load_config_file("test.yml")
 
     # generate grid
-    grid = generate_grid(parameters)
+    grid = generate_1d_grid(parameters)
     #p = gridplot(grid; Plotter, size=(12000, 4000))
 
 
@@ -223,7 +230,6 @@ function main(;
     p = GridVisualizer(;
         Plotter,
         layout=(3, 1),
-        size=(6000, 2000),
         clear=true)
     #scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
 
@@ -237,7 +243,7 @@ function main(;
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
-    while time < 0.01
+    while time < 100
         time = time + tstep
         U = solve(sys2; inival, control, tstep)
         inival .= U
@@ -245,9 +251,9 @@ function main(;
         tstep = min(tstep, 0.2)
         println(time)
     end
-    scalarplot!(p[1, 1], grid, U[1, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
-    scalarplot!(p[2, 1], grid, U[2, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
-    scalarplot!(p[3, 1], grid, U[3, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
+    scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 1.0), clear=true, show=true)
+    scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 1.0), clear=true, show=true)
+    scalarplot!(p[3, 1], grid, U[3, :], xlimits=(0, 1.0), clear=true, show=true)
     return reveal(p)
 
 end
