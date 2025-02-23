@@ -6,8 +6,8 @@ const K_B = 1.380649e-23 # Boltzmann constant [J/K]
 const R = 8.31446261815324 # Molar gas constant [J/(K⋅mol)]
 const N_A = 6.02214076e23 # Avogadro constant
 const F = 9.64853321233100184e4 # Faraday constant [C/mol]
-const Z_PLUS = 1 # cation charge sign
-const Z_MINUS = -1 # cation charge sign
+const Z_CATION = 1 # cation charge sign
+const Z_ANION = -1 # cation charge sign
 const E_CHARGE = 1.6020e-19 # Elementary charge [C]
 # Material constants
 const EPSILON_R = 80 # Relative dielectric constant

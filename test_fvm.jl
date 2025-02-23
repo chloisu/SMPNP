@@ -19,13 +19,13 @@ include("constants.jl")
 #using Configurations
 @option struct Parameters
     case::String = "test_case" # name of the case 
-    #D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
+    D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
     pore_radius::Float64 = 1.5e-9 # pore radius [meter]
     pore_length::Float64 = 50e-9 # pore length [meter]
     #cation_size::Float64 = 1e-10 # cation size [meter]
     #anion_size::Float64 = 1e-10 # cation size [meter]
-    #D_anion::Float64 = D_ref # anion diffusivity [m^2/s]
-    #D_cation::Float64 = D_ref # cation diffusivity [m^2/s]
+    D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
+    D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
     surface_potential::Float64 = 0.3 # surface potential [V]
     #c_0::Float64 = 1 # initial concentration [mol/L]
     #max_iter::Int = 20 # maximum nonlinear Newton iterations 
@@ -122,7 +122,6 @@ function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    println(surface_potential_norm)
     boundary_dirichlet!(sys, 1, 1, 0)
     boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
     # we set the inital potential distribution to zero
@@ -132,25 +131,35 @@ function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
 end
 
 
-function get_time_dependent_system_with_boundary_conditions(grid, initial_potential=:nothing, config=:nothing)
+function get_time_dependent_system_with_boundary_conditions(grid, initial_potential=:nothing, parameters=:nothing)
     # this system describes the phyiscs of the time-dependent PNP equations
     # the index of the different species are 
     # 1 = potential $\phi$
     # 2 = anion concentration $c_a$
     # 3 = cation concentration $c_c$
+
+    # we compute the prefactor for the Poisson equation
+    r = parameters.pore_radius
+    prefactor = 1.0 / (4 * pi * r^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
+    # we scale the diffusivities of the two concentration equations
+    D_a_norm = parameters.D_anion / parameters.D_ref
+    D_c_norm = parameters.D_cation / parameters.D_ref
+
     physics = VoronoiFVM.Physics(
         ; reaction=function (f, u, node, data)
             # source term of the poisson equation
-            f[1] = -(-u[2] + u[3])
+            f[1] = -(Z_ANION * u[2] + Z_CATION * u[3])
             return nothing
         end,
         flux=function (f, u, edge, data)
             # potential flux is simple poisson
-            f[1] = (u[1, 1] - u[1, 2])
+            f[1] = prefactor * (u[1, 1] - u[1, 2])
             # anion flux is diffusion + migration
-            f[2] = (u[2, 1] - u[2, 2]) - (u[1, 1] - u[1, 2])
+            c_anion_interface = 0.5 * (u[2, 1] + u[2, 2])
+            f[2] = D_a_norm * ((u[2, 1] - u[2, 2]) + c_anion_interface * Z_ANION * (u[1, 1] - u[1, 2]))
             # cation flux is diffusion + migration
-            f[3] = (u[3, 1] - u[3, 2]) + (u[1, 1] - u[1, 2])
+            c_cation_interface = 0.5 * (u[3, 1] + u[3, 2])
+            f[3] = D_c_norm * ((u[3, 1] - u[3, 2]) + c_cation_interface * Z_CATION * (u[1, 1] - u[1, 2]))
             return nothing
         end,
         storage=function (f, u, node, data)
@@ -166,8 +175,9 @@ function get_time_dependent_system_with_boundary_conditions(grid, initial_potent
     enable_species!(sys, 2, [1]) # add anion
     enable_species!(sys, 3, [1]) # add cation
     # potential boundary conditions
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, 3)
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
     # anion boundary conditions
     boundary_dirichlet!(sys, 2, 1, 1.0)
     #boundary_dirichlet!(sys, 2, 4, 0.0)
@@ -203,7 +213,7 @@ function main(;
     control.abstol = 1e-6
     control.method_linear = method_linear
 
-    tstep = 1
+    tstep = 1e-6
     time = 0
     U = solve(sys; control, tstep)
     initial_potential = U[1, :]
@@ -213,35 +223,34 @@ function main(;
     p = GridVisualizer(;
         Plotter,
         layout=(3, 1),
-        size=(12000, 4000),
+        size=(6000, 2000),
         clear=true)
-    scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
-    """
+    #scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
+
     # now solve the time-dependent once
     control2 = VoronoiFVM.NewtonControl()
-    control2.verbose = verbose
+    #control2.verbose = verbose
     control2.reltol_linear = 1.0e-8
     control2.method_linear = method_linear
-    sys2 = get_time_dependent_system_with_boundary_conditions(grid, initial_potential)
+    sys2 = get_time_dependent_system_with_boundary_conditions(grid, initial_potential, parameters)
     inival = unknowns(sys2)
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
-    while time < 10
+    while time < 0.01
         time = time + tstep
         U = solve(sys2; inival, control, tstep)
         inival .= U
-        tstep *= 1.0
+        tstep *= 2
+        tstep = min(tstep, 0.2)
+        println(time)
     end
-    scalarplot!(p[1, 1], grid, U[1, :], clear=true, show=true)
-    scalarplot!(p[2, 1], grid, U[2, :], clear=true, show=true)
-    scalarplot!(p[3, 1], grid, U[3, :], clear=true, show=true)
+    scalarplot!(p[1, 1], grid, U[1, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
+    scalarplot!(p[2, 1], grid, U[2, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
+    scalarplot!(p[3, 1], grid, U[3, :], xlimits=(5, 6), yplanes=[4.5], clear=true, show=true)
     return reveal(p)
-    """
-    return reveal(p)
+
 end
-
-
 
 GC.gc()  # Force garbage collection
 using GLMakie
