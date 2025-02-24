@@ -54,9 +54,9 @@ function generate_grid(parameters)
     p2 = point!(builder, l, 0)
     p3 = point!(builder, l, l - r)
     p4 = point!(builder, 2 * l, l - r)
-    p5 = point!(builder, 2 * l, 0)
-    p6 = point!(builder, 3 * l, 0)
-    p7 = point!(builder, 3 * l, l)
+    p5 = point!(builder, 2 * l, l)
+    #p6 = point!(builder, 3 * l, 0)
+    #p7 = point!(builder, 3 * l, l)
     p8 = point!(builder, 0, l)
     # left reservoir
     facetregion!(builder, 1)
@@ -64,32 +64,43 @@ function generate_grid(parameters)
     # bottom reservoir
     facetregion!(builder, 2)
     facet!(builder, p1, p2)
-    facet!(builder, p5, p6)
+    facet!(builder, p2, p3)
+    #facet!(builder, p5, p6)
     # pore wall
     facetregion!(builder, 3)
-    facet!(builder, p2, p3)
     facet!(builder, p3, p4)
     facet!(builder, p4, p5)
     # right reservoir
-    facetregion!(builder, 4)
-    facet!(builder, p6, p7)
+    #facetregion!(builder, 4)
+    #facet!(builder, p6, p7)
     # symmetry line
-    facetregion!(builder, 5)
-    facet!(builder, p7, p8)
+    facetregion!(builder, 4)
+    facet!(builder, p5, p8)
 
 
     function unsuitable(x1, y1, x2, y2, x3, y3, area)
         bary = [(x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3]
+        needs_refinement = 0
+        # towards the pore wall below
         min_x = l
         max_x = 2 * l
         rf_x = max(min_x, min(bary[1], max_x))
         refinement_center = [rf_x, l - r]
         dist = norm(bary - refinement_center)
-        if area > 0.01 * dist
-            return 1
-        else
-            return 0
+        if area > 0.1 * dist
+            needs_refinement = 1
         end
+        # towards the right wall
+        min_y = l - r
+        max_y = l
+        rf_y = max(min_y, min(bary[2], max_y))
+        refinement_center = [2 * l, rf_y]
+        dist = norm(bary - refinement_center)
+        if area > 0.1 * dist
+            needs_refinement = 1
+        end
+
+        return needs_refinement
     end
     options!(builder; unsuitable=unsuitable)
     grid = simplexgrid(builder)
@@ -129,8 +140,8 @@ function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 2, 0)
-    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 1, 0)
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
     # we set the inital potential distribution to zero
     inival = unknowns(sys)
     inival .= 0
@@ -183,18 +194,18 @@ function get_time_dependent_system_with_boundary_conditions(grid, initial_potent
     enable_species!(sys, 3, [1]) # add cation
     # potential boundary conditions
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 2, 0)
-    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 1, 0)
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
     # anion boundary conditions
-    #boundary_neumann!(sys, 2, 1, 0.0)
-    boundary_dirichlet!(sys, 2, 2, 1.0)
+    boundary_dirichlet!(sys, 2, 1, 1.0)
+    #boundary_neumann!(sys, 2, 2, 0.0)
     # cation bounda ry conditions
-    #boundary_neumann!(sys, 3, 1, 0.0)
-    boundary_dirichlet!(sys, 3, 2, 1.0)
+    boundary_dirichlet!(sys, 3, 1, 1.0)
+    #boundary_neumann!(sys, 3, 2, 0.0)
     U = unknowns(sys)
     U[1, :] = initial_potential
-    U[2, :] .= 1.0
-    U[3, :] .= 1.0
+    U[2, :] .= 2.0
+    U[3, :] .= 2.0
     return sys
 end
 
@@ -208,8 +219,8 @@ function main(;
     parameters = load_config_file("test.yml")
 
     # generate grid
-    grid = generate_1d_grid(parameters)
-    #p = gridplot(grid; Plotter, size=(12000, 4000))
+    grid = generate_grid(parameters)
+    p = gridplot(grid; Plotter, size=(3000, 1000))
 
 
     sys = get_initial_timestep_system_with_boundary_conditions(grid, parameters)
@@ -227,10 +238,10 @@ function main(;
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
-    p = GridVisualizer(;
-        Plotter,
-        layout=(3, 1),
-        clear=true)
+    #p = GridVisualizer(;
+    #    Plotter,
+    #    layout=(3, 1),
+    #    clear=true)
     #scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
 
     # now solve the time-dependent once
@@ -243,7 +254,7 @@ function main(;
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
-    while time < 100
+    while time < 0.01
         time = time + tstep
         U = solve(sys2; inival, control, tstep)
         inival .= U
@@ -251,14 +262,14 @@ function main(;
         tstep = min(tstep, 0.2)
         println(time)
     end
-    scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 1.0), clear=true, show=true)
-    scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 1.0), clear=true, show=true)
-    scalarplot!(p[3, 1], grid, U[3, :], xlimits=(0, 1.0), clear=true, show=true)
-    return reveal(p)
+    #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(5, 10), ylimits=(4, 5), clear=true, show=true)
+    #calarplot!(p[2, 1], grid, U[2, :], xlimits=(5, 10), ylimits=(4, 5), 3clear=true, show=true)
+    #scalarplot!(p[3, 1], grid, U[3, :], xlimits=(5, 10), ylimits=(4, 5), clear=true, show=true)
+    return p
 
 end
 
 GC.gc()  # Force garbage collection
 using GLMakie
 p = main(Plotter=GLMakie, verbose=true)
-GLMakie.save(joinpath(".", "out.png"), p)  #hide
+GLMakie.save(joinpath(".", "mesh.jpg"), p)  #hide
