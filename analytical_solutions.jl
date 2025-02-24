@@ -16,6 +16,13 @@ function potential_pb_1d(grid, wall_potential, r)
     return map(x -> 2 * log((a + b * exp(-x / lambda_d)) / (a - b * exp(-x / lambda_d))), g)
 end
 
+function concentrations_pb_1d(grid, wall_potential, r)
+    potential_fun = potential_pb_1d(grid, wall_potential, r)
+    ca = map(x -> exp(-Z_ANION * x), potential_fun)
+    cc = map(x -> exp(-Z_CATION * x), potential_fun)
+    return ca, cc
+end
+
 #function plotting_func1d(; Plotter=default_plotter(), kwargs...)
 #    g, f = potential_pb_1d(0.4, 5e-9)
 #    return scalarplot(g, f; Plotter=Plotter, resolution=(500, 300), kwargs...)

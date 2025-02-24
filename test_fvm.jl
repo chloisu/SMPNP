@@ -21,7 +21,7 @@ include("analytical_solutions.jl")
 @option struct Parameters
     case::String = "test_case" # name of the case 
     D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
-    pore_radius::Float64 = 10e-9 # pore radius [meter]
+    pore_radius::Float64 = 5e-9 # pore radius [meter]
     pore_length::Float64 = 50e-9 # pore length [meter]
     #cation_size::Float64 = 1e-10 # cation size [meter]
     #anion_size::Float64 = 1e-10 # cation size [meter]
@@ -301,11 +301,14 @@ function main(;
     end
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
+    ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     scalarplot!(p[1, 1], grid, U[1, :], show=true)
 
     scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
-    scalarplot!(p[2, 1], grid, U[2, :], clear=true, show=true)
-    scalarplot!(p[3, 1], grid, U[3, :], clear=true, show=true)
+    scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true)
+    scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    scalarplot!(p[3, 1], grid, U[3, :], clear=false, show=true)
+    scalarplot!(p[3, 1], grid, cc, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
     return reveal(p)
 
 end
