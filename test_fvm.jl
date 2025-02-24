@@ -14,19 +14,20 @@ using LinearAlgebra
 using YAML
 using Configurations
 include("constants.jl")
+include("analytical_solutions.jl")
 #include("parameters.jl")  # Include the parameters file
 #using .ParametersModule  # Use the module
 #using Configurations
 @option struct Parameters
     case::String = "test_case" # name of the case 
     D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
-    pore_radius::Float64 = 1.5e-9 # pore radius [meter]
+    pore_radius::Float64 = 10e-9 # pore radius [meter]
     pore_length::Float64 = 50e-9 # pore length [meter]
     #cation_size::Float64 = 1e-10 # cation size [meter]
     #anion_size::Float64 = 1e-10 # cation size [meter]
     D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
     D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
-    surface_potential::Float64 = 0.1 # surface potential [V]
+    surface_potential::Float64 = 0.01 # surface potential [V]
     #c_0::Float64 = 1 # initial concentration [mol/L]
     #max_iter::Int = 20 # maximum nonlinear Newton iterations 
     #dt::Float64 = 1e-6 # timestep
@@ -41,7 +42,7 @@ function load_config_file(filename)
     return parameters
 end
 
-function generate_grid(parameters)
+function generate_grid_2d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.pore_radius / parameters.pore_radius
     l = parameters.pore_length / parameters.pore_radius
@@ -108,12 +109,68 @@ function generate_grid(parameters)
     return grid
 end
 
-function generate_1d_grid(parameters)
+function generate_grid_1d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.pore_radius / parameters.pore_radius
     X = collect(0:0.001:r)
     return simplexgrid(X)
 end
+
+function intial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+    # we add the boundary conditions
+    # we scale the surface potential to the correct value
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    boundary_dirichlet!(sys, 1, 1, 0)
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    # we set the inital potential distribution to zero
+    inival = unknowns(sys)
+    inival .= 0
+end
+
+function initial_timestep_initial_and_boundary_conditions_1d!(sys, parameters)
+    # we add the boundary conditions
+    # we scale the surface potential to the correct value
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 2, 0)
+    # we set the inital potential distribution to zero
+    inival = unknowns(sys)
+    inival .= 0
+end
+
+function time_dependent_initial_and_boundary_conditions_2d!(sys, initial_potential, parameters)
+    # potential boundary conditions
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    boundary_dirichlet!(sys, 1, 1, 0)
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    # anion boundary conditions
+    boundary_dirichlet!(sys, 2, 1, 1.0)
+    #boundary_neumann!(sys, 2, 2, 0.0)
+    # cation bounda ry conditions
+    boundary_dirichlet!(sys, 3, 1, 1.0)
+    #boundary_neumann!(sys, 3, 2, 0.0)
+    U = unknowns(sys)
+    U[1, :] = initial_potential
+    U[2, :] .= 1.0
+    U[3, :] .= 1.0
+end
+function time_dependent_initial_and_boundary_conditions_1d!(sys, initial_potential, parameters)
+    # potential boundary conditions
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 2, 0.0)
+    # anion boundary conditions
+    boundary_dirichlet!(sys, 2, 2, 1.0)
+    #boundary_neumann!(sys, 2, 2, 0.0)
+    # cation bounda ry conditions
+    boundary_dirichlet!(sys, 3, 2, 1.0)
+    #boundary_neumann!(sys, 3, 2, 0.0)
+    U = unknowns(sys)
+    U[1, :] = initial_potential
+    U[2, :] .= 1.0
+    U[3, :] .= 1.0
+end
+
 
 """
     get_initial_timestep_system(config)
@@ -121,7 +178,7 @@ end
 returns a VoronoiFVM.System to solve the initial poisson 
 equation for the potential distribution.
 """
-function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
+function get_initial_timestep_system(grid, parameters)
     # we setup the physics for the poisson system only
     # we compute the prefactor for the Poisson equation
     r = parameters.pore_radius
@@ -136,20 +193,11 @@ function get_initial_timestep_system_with_boundary_conditions(grid, parameters)
     sys = VoronoiFVM.System(grid, physics; is_linear=false, unknown_storage=:sparse, assembly=:edgewise)
     # we add the potential 'species'
     enable_species!(sys, 1, [1])
-
-    # we add the boundary conditions
-    # we scale the surface potential to the correct value
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
-    # we set the inital potential distribution to zero
-    inival = unknowns(sys)
-    inival .= 0
     return sys
 end
 
 
-function get_time_dependent_system_with_boundary_conditions(grid, initial_potential=:nothing, parameters=:nothing)
+function get_time_dependent_system(grid, parameters=:nothing)
     # this system describes the phyiscs of the time-dependent PNP equations
     # the index of the different species are 
     # 1 = potential $\phi$
@@ -192,20 +240,6 @@ function get_time_dependent_system_with_boundary_conditions(grid, initial_potent
     enable_species!(sys, 1, [1]) # add potential
     enable_species!(sys, 2, [1]) # add anion
     enable_species!(sys, 3, [1]) # add cation
-    # potential boundary conditions
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
-    # anion boundary conditions
-    boundary_dirichlet!(sys, 2, 1, 1.0)
-    #boundary_neumann!(sys, 2, 2, 0.0)
-    # cation bounda ry conditions
-    boundary_dirichlet!(sys, 3, 1, 1.0)
-    #boundary_neumann!(sys, 3, 2, 0.0)
-    U = unknowns(sys)
-    U[1, :] = initial_potential
-    U[2, :] .= 2.0
-    U[3, :] .= 2.0
     return sys
 end
 
@@ -219,11 +253,12 @@ function main(;
     parameters = load_config_file("test.yml")
 
     # generate grid
-    grid = generate_grid(parameters)
+    grid = generate_grid_1d(parameters)
     p = gridplot(grid; Plotter, size=(3000, 1000))
 
 
-    sys = get_initial_timestep_system_with_boundary_conditions(grid, parameters)
+    sys = get_initial_timestep_system(grid, parameters)
+    initial_timestep_initial_and_boundary_conditions_1d!(sys, parameters)
 
     control = VoronoiFVM.NewtonControl()
     control.verbose = verbose
@@ -238,10 +273,10 @@ function main(;
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
-    #p = GridVisualizer(;
-    #    Plotter,
-    #    layout=(3, 1),
-    #    clear=true)
+    p = GridVisualizer(;
+        Plotter,
+        layout=(3, 1),
+        clear=true)
     #scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
 
     # now solve the time-dependent once
@@ -249,12 +284,14 @@ function main(;
     #control2.verbose = verbose
     control2.reltol_linear = 1.0e-8
     control2.method_linear = method_linear
-    sys2 = get_time_dependent_system_with_boundary_conditions(grid, initial_potential, parameters)
+    sys2 = get_time_dependent_system(grid, parameters)
+    time_dependent_initial_and_boundary_conditions_1d!(sys2, initial_potential, parameters)
     inival = unknowns(sys2)
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
-    while time < 0.01
+    # time loop
+    while time < 20
         time = time + tstep
         U = solve(sys2; inival, control, tstep)
         inival .= U
@@ -262,14 +299,18 @@ function main(;
         tstep = min(tstep, 0.2)
         println(time)
     end
-    #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(5, 10), ylimits=(4, 5), clear=true, show=true)
-    #calarplot!(p[2, 1], grid, U[2, :], xlimits=(5, 10), ylimits=(4, 5), 3clear=true, show=true)
-    #scalarplot!(p[3, 1], grid, U[3, :], xlimits=(5, 10), ylimits=(4, 5), clear=true, show=true)
-    return p
+    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
+    scalarplot!(p[1, 1], grid, U[1, :], show=true)
+
+    scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    scalarplot!(p[2, 1], grid, U[2, :], clear=true, show=true)
+    scalarplot!(p[3, 1], grid, U[3, :], clear=true, show=true)
+    return reveal(p)
 
 end
 
 GC.gc()  # Force garbage collection
 using GLMakie
 p = main(Plotter=GLMakie, verbose=true)
-GLMakie.save(joinpath(".", "mesh.jpg"), p)  #hide
+GLMakie.save(joinpath(".", "out.jpg"), p)  #hide
