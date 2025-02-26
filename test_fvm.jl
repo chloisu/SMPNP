@@ -56,9 +56,9 @@ function generate_grid_2d(parameters)
     p2 = point!(builder, l, 0)
     p3 = point!(builder, l, l - r)
     p4 = point!(builder, 2 * l, l - r)
-    p5 = point!(builder, 2 * l, l)
-    #p6 = point!(builder, 3 * l, 0)
-    #p7 = point!(builder, 3 * l, l)
+    p5 = point!(builder, 2 * l, 0)
+    p6 = point!(builder, 3 * l, 0)
+    p7 = point!(builder, 3 * l, l)
     p8 = point!(builder, 0, l)
     # left reservoir
     facetregion!(builder, 1)
@@ -67,17 +67,17 @@ function generate_grid_2d(parameters)
     facetregion!(builder, 2)
     facet!(builder, p1, p2)
     facet!(builder, p2, p3)
-    #facet!(builder, p5, p6)
+    facet!(builder, p4, p5)
+    facet!(builder, p5, p6)
     # pore wall
     facetregion!(builder, 3)
     facet!(builder, p3, p4)
-    facet!(builder, p4, p5)
     # right reservoir
-    #facetregion!(builder, 4)
-    #facet!(builder, p6, p7)
-    # symmetry line
     facetregion!(builder, 4)
-    facet!(builder, p5, p8)
+    facet!(builder, p6, p7)
+    # symmetry line
+    facetregion!(builder, 5)
+    facet!(builder, p7, p8)
 
 
     function unsuitable(x1, y1, x2, y2, x3, y3, area)
@@ -92,15 +92,15 @@ function generate_grid_2d(parameters)
         if area > 0.1 * dist
             needs_refinement = 1
         end
-        # towards the right wall
-        min_y = l - r
-        max_y = l
-        rf_y = max(min_y, min(bary[2], max_y))
-        refinement_center = [2 * l, rf_y]
-        dist = norm(bary - refinement_center)
-        if area > 0.1 * dist
-            needs_refinement = 1
-        end
+        ## towards the right wall
+        #min_y = l - r
+        #max_y = l
+        #rf_y = max(min_y, min(bary[2], max_y))
+        #refinement_center = [2 * l, rf_y]
+        #dist = norm(bary - refinement_center)
+        #if area > 0.1 * dist
+        #    needs_refinement = 1
+        #end
 
         return needs_refinement
     end
@@ -121,8 +121,9 @@ function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
+    #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
     # we set the inital potential distribution to zero
     inival = unknowns(sys)
     inival .= 0
@@ -142,13 +143,16 @@ end
 function time_dependent_initial_and_boundary_conditions_2d!(sys, initial_potential, parameters)
     # potential boundary conditions
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0)
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm)
+    boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
+    #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
+    boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
     # anion boundary conditions
-    boundary_dirichlet!(sys, 2, 1, 1.0)
-    #boundary_neumann!(sys, 2, 2, 0.0)
+    boundary_dirichlet!(sys, 2, 1, 1.0) #left reservoir
+    #boundary_dirichlet!(sys, 2, 4, 1.1) # right reservoir
     # cation bounda ry conditions
-    boundary_dirichlet!(sys, 3, 1, 1.0)
+    boundary_dirichlet!(sys, 3, 1, 1.0)#left reservoir
+    boundary_dirichlet!(sys, 3, 4, 1.1)# right reservoir
+
     #boundary_neumann!(sys, 3, 2, 0.0)
     U = unknowns(sys)
     U[1, :] = initial_potential
@@ -250,8 +254,6 @@ function get_time_dependent_system(grid, parameters=:nothing)
     return sys
 end
 
-
-
 function main(;
     n=10, Plotter=nothing, verbose=false, unknown_storage=:sparse,
     method_linear=nothing, assembly=:edgewise
@@ -260,12 +262,12 @@ function main(;
     parameters = load_config_file("test.yml")
 
     # generate grid
-    grid = generate_grid_1d(parameters)
+    grid = generate_grid_2d(parameters)
     p = gridplot(grid; Plotter, size=(3000, 1000))
 
 
     sys = get_initial_timestep_system(grid, parameters)
-    initial_timestep_initial_and_boundary_conditions_1d!(sys, parameters)
+    initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
 
     control = VoronoiFVM.NewtonControl()
     control.verbose = verbose
@@ -293,14 +295,14 @@ function main(;
     control2.reltol_linear = 1.0e-8
     control2.method_linear = method_linear
     sys2 = get_time_dependent_system(grid, parameters)
-    time_dependent_initial_and_boundary_conditions_1d!(sys2, initial_potential, parameters)
+    time_dependent_initial_and_boundary_conditions_2d!(sys2, initial_potential, parameters)
     inival = unknowns(sys2)
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
     # time loop
     t_plot = 0.0
-    while time < 20
+    while time < 2000
         if time > t_plot
             #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
             #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
@@ -314,7 +316,7 @@ function main(;
             time = time + tstep
             inival .= U
             tstep *= 2
-            tstep = min(tstep, 0.2)
+            tstep = min(tstep, 2)
         catch error
             tstep *= 0.5
             print("Repeating timestep at time: ")
@@ -325,15 +327,27 @@ function main(;
         end
 
     end
+    nf = nodeflux(sys2, U)
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
-    ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
+    #f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
+    #ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     scalarplot!(p[1, 1], grid, U[1, :], show=true)
-    scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    vectorplot!(p[1, 1], grid, nf[:, 1, :]; clear=false, vscale=1.5)
+
+    #scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+
     scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true)
-    scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    vectorplot!(p[2, 1], grid, nf[:, 2, :]; clear=false, vscale=1.5)
+
+    #scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
     scalarplot!(p[3, 1], grid, U[3, :], clear=false, show=true)
-    scalarplot!(p[3, 1], grid, cc, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    vectorplot!(p[3, 1], grid, nf[:, 3, :]; clear=false, vscale=1.5)
+    #scalarplot!(p[3, 1], grid, cc, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
+    println("Norm of J- flux")
+    println(sum(sum(abs(nf[:, 2, :]))))
+
+    println("Norm of J+ flux")
+    println(sum(sum(abs.(nf[:, 3, :]))))
     return reveal(p)
 
 end
