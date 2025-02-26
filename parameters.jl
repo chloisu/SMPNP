@@ -10,7 +10,7 @@ using Configurations
     PNP_mode::String = "PNP" |> validate_PNP_mode
     D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
     pore_radius::Float64 = 5e-9 # pore radius [meter]
-    pore_length::Float64 = 10e-9 # pore length [meter]
+    pore_length::Float64 = 50e-9 # pore length [meter]
     cation_size::Float64 = 5e-10 # cation size [meter]
     anion_size::Float64 = 5e-10 # cation size [meter]
     solvent_molecule_size::Float64 = 5e-10

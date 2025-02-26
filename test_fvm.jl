@@ -50,7 +50,6 @@ function generate_grid_2d(parameters)
     # we will generate a bounding box that goes from 0 to 3l with the middle l section to be the pore
     # for the radius, we will have the tube at the top with a total height of l
     builder = SimplexGridBuilder(; Generator=Triangulate)
-    l = 5 * r
     cellregion!(builder, 1)
     p1 = point!(builder, 0, 0)
     p2 = point!(builder, l, 0)
@@ -89,7 +88,7 @@ function generate_grid_2d(parameters)
         rf_x = max(min_x, min(bary[1], max_x))
         refinement_center = [rf_x, l - r]
         dist = norm(bary - refinement_center)
-        if area > 0.1 * dist
+        if area > 0.01 * dist
             needs_refinement = 1
         end
         ## towards the right wall
@@ -331,23 +330,25 @@ function main(;
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     #f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     #ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
-    scalarplot!(p[1, 1], grid, U[1, :], show=true)
-    vectorplot!(p[1, 1], grid, nf[:, 1, :]; clear=false, vscale=1.5)
+    scalarplot!(p[1, 1], grid, U[1, :], show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
+    vectorplot!(p[1, 1], grid, nf[:, 1, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
 
     #scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
 
-    scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true)
-    vectorplot!(p[2, 1], grid, nf[:, 2, :]; clear=false, vscale=1.5)
+    scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
+    vectorplot!(p[2, 1], grid, nf[:, 2, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
 
     #scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
-    scalarplot!(p[3, 1], grid, U[3, :], clear=false, show=true)
-    vectorplot!(p[3, 1], grid, nf[:, 3, :]; clear=false, vscale=1.5)
+    scalarplot!(p[3, 1], grid, U[3, :], clear=false, show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
+    vectorplot!(p[3, 1], grid, nf[:, 3, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
     #scalarplot!(p[3, 1], grid, cc, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
     println("Norm of J- flux")
-    println(sum(sum(abs(nf[:, 2, :]))))
+    println(sum(sum(abs.(nf[:, 2, :]))))
 
     println("Norm of J+ flux")
     println(sum(sum(abs.(nf[:, 3, :]))))
+
+    writeVTK("test.vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
     return reveal(p)
 
 end
