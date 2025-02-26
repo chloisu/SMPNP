@@ -15,25 +15,26 @@ using YAML
 using Configurations
 include("constants.jl")
 include("analytical_solutions.jl")
-#include("parameters.jl")  # Include the parameters file
+include("parameters.jl")  # Include the parameters file
+include("chemical_potential.jl")
 #using .ParametersModule  # Use the module
 #using Configurations
-@option struct Parameters
-    case::String = "test_case" # name of the case 
-    D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
-    pore_radius::Float64 = 5e-9 # pore radius [meter]
-    pore_length::Float64 = 50e-9 # pore length [meter]
-    #cation_size::Float64 = 1e-10 # cation size [meter]
-    #anion_size::Float64 = 1e-10 # cation size [meter]
-    D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
-    D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
-    surface_potential::Float64 = 0.01 # surface potential [V]
-    #c_0::Float64 = 1 # initial concentration [mol/L]
-    #max_iter::Int = 20 # maximum nonlinear Newton iterations 
-    #dt::Float64 = 1e-6 # timestep
-    #dt_max::Float64 = 2e-1 # maximum timestep
-    #t_final::Float64 = 1 # final time
-end
+#@option struct Parameters
+#    case::String = "test_case" # name of the case 
+#    D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
+#    pore_radius::Float64 = 5e-9 # pore radius [meter]
+#    pore_length::Float64 = 50e-9 # pore length [meter]
+#    #cation_size::Float64 = 1e-10 # cation size [meter]
+#    #anion_size::Float64 = 1e-10 # cation size [meter]
+#    D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
+#    D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
+#    surface_potential::Float64 = 0.01 # surface potential [V]
+#    #c_0::Float64 = 1 # initial concentration [mol/L]
+#    #max_iter::Int = 20 # maximum nonlinear Newton iterations 
+#    #dt::Float64 = 1e-6 # timestep
+#    #dt_max::Float64 = 2e-1 # maximum timestep
+#    #t_final::Float64 = 1 # final time
+#end
 
 function load_config_file(filename)
     # Define a struct for your configuration
@@ -116,7 +117,7 @@ function generate_grid_1d(parameters)
     return simplexgrid(X)
 end
 
-function intial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
@@ -158,7 +159,7 @@ function time_dependent_initial_and_boundary_conditions_1d!(sys, initial_potenti
     # potential boundary conditions
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
-    boundary_dirichlet!(sys, 1, 2, 0.0)
+    boundary_dirichlet!(sys, 1, 2, 0)
     # anion boundary conditions
     boundary_dirichlet!(sys, 2, 2, 1.0)
     #boundary_neumann!(sys, 2, 2, 0.0)
@@ -218,14 +219,20 @@ function get_time_dependent_system(grid, parameters=:nothing)
             return nothing
         end,
         flux=function (f, u, edge, data)
+            # compute the chemical potentials for the two cells
+            μ_anion1 = μ(u[2, 1], u[3, 1], Z_ANION, u[1, 1], parameters)
+            μ_anion2 = μ(u[2, 2], u[3, 2], Z_ANION, u[1, 2], parameters)
+
+            μ_cation1 = μ(u[3, 1], u[2, 1], Z_CATION, u[1, 1], parameters)
+            μ_cation2 = μ(u[3, 2], u[2, 2], Z_CATION, u[1, 2], parameters)
             # potential flux is simple poisson
             f[1] = prefactor * (u[1, 1] - u[1, 2])
             # anion flux is diffusion + migration
             c_anion_interface = 0.5 * (u[2, 1] + u[2, 2])
-            f[2] = D_a_norm * ((u[2, 1] - u[2, 2]) + c_anion_interface * Z_ANION * (u[1, 1] - u[1, 2]))
+            f[2] = D_a_norm * c_anion_interface * (μ_anion1 - μ_anion2)#(((u[2, 1] - u[2, 2]) + c_anion_interface * Z_ANION * (u[1, 1] - u[1, 2])))
             # cation flux is diffusion + migration
             c_cation_interface = 0.5 * (u[3, 1] + u[3, 2])
-            f[3] = D_c_norm * ((u[3, 1] - u[3, 2]) + c_cation_interface * Z_CATION * (u[1, 1] - u[1, 2]))
+            f[3] = D_c_norm * c_cation_interface * (μ_cation1 - μ_cation2)#((u[3, 1] - u[3, 2]) + c_cation_interface * Z_CATION * (u[1, 1] - u[1, 2]))
             return nothing
         end,
         storage=function (f, u, node, data)
@@ -265,6 +272,7 @@ function main(;
     control.reltol_linear = 1.0e-8
     control.abstol = 1e-6
     control.method_linear = method_linear
+    control.maxiters = 20
 
     tstep = 1e-6
     time = 0
@@ -291,19 +299,36 @@ function main(;
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
     # time loop
+    t_plot = 0.0
     while time < 20
-        time = time + tstep
-        U = solve(sys2; inival, control, tstep)
-        inival .= U
-        tstep *= 2
-        tstep = min(tstep, 0.2)
-        println(time)
+        if time > t_plot
+            #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
+            #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
+            #scalarplot!(p[3, 1], grid, U[3, :], xlimits=(0, 0.1), clear=false, show=true)
+            t_plot = t_plot + 0.01
+        end
+        try
+            print("Solving timestep at time: ")
+            println(time)
+            U = solve(sys2; inival, control, tstep)
+            time = time + tstep
+            inival .= U
+            tstep *= 2
+            tstep = min(tstep, 0.2)
+        catch error
+            tstep *= 0.5
+            print("Repeating timestep at time: ")
+            println(time)
+            print("with timestep: ")
+            println(tstep)
+            # this means we didn't converge, so we will decrease the timestep
+        end
+
     end
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     scalarplot!(p[1, 1], grid, U[1, :], show=true)
-
     scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
     scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true)
     scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
