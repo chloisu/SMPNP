@@ -24,20 +24,21 @@ this function generates the 2D grid of the simulation with the pore geometry and
 """
 function generate_grid_2d(parameters)
     # first, we normalize the geometry inputs
-    r = parameters.pore_radius / parameters.pore_radius
-    l = parameters.pore_length / parameters.pore_radius
+    r = parameters.pore_radius / parameters.pore_length
+    l = parameters.pore_length / parameters.pore_length
+    h = parameters.reservoir_height / parameters.pore_length
     # we will generate a bounding box that goes from 0 to 3l with the middle l section to be the pore
     # for the radius, we will have the tube at the top with a total height of l
     builder = SimplexGridBuilder(; Generator=Triangulate)
     cellregion!(builder, 1) # this is our inside domain
     p1 = point!(builder, 0, 0)
     p2 = point!(builder, l, 0)
-    p3 = point!(builder, l, l - r)
-    p4 = point!(builder, 2 * l, l - r)
+    p3 = point!(builder, l, h - r)
+    p4 = point!(builder, 2 * l, h - r)
     p5 = point!(builder, 2 * l, 0)
     p6 = point!(builder, 3 * l, 0)
-    p7 = point!(builder, 3 * l, l)
-    p8 = point!(builder, 0, l)
+    p7 = point!(builder, 3 * l, h)
+    p8 = point!(builder, 0, h)
     # left reservoir
     facetregion!(builder, 1)
     facet!(builder, p8, p1)
@@ -67,21 +68,11 @@ function generate_grid_2d(parameters)
         min_x = l
         max_x = 2 * l
         rf_x = max(min_x, min(bary[1], max_x))
-        refinement_center = [rf_x, l - r]
+        refinement_center = [rf_x, h - r]
         dist = norm(bary - refinement_center)
-        if area > 0.005 * dist
+        if area > 0.0005 * dist
             needs_refinement = 1
         end
-        ## towards the right wall
-        #min_y = l - r
-        #max_y = l
-        #rf_y = max(min_y, min(bary[2], max_y))
-        #refinement_center = [2 * l, rf_y]
-        #dist = norm(bary - refinement_center)
-        #if area > 0.1 * dist
-        #    needs_refinement = 1
-        #end
-
         return needs_refinement
     end
     options!(builder; unsuitable=unsuitable)
@@ -95,7 +86,7 @@ simple 1D grid
 """
 function generate_grid_1d(parameters)
     # first, we normalize the geometry inputs
-    r = parameters.pore_radius / parameters.pore_radius
+    r = parameters.pore_radius / parameters.pore_length
     X = collect(0:0.001:r)
     return simplexgrid(X)
 end
@@ -170,8 +161,8 @@ equation for the potential distribution.
 function get_initial_timestep_system(grid, parameters)
     # we setup the physics for the poisson system only
     # we compute the prefactor for the Poisson equation
-    r = parameters.pore_radius
-    prefactor = 1.0 / (4 * pi * r^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
+    L = parameters.pore_length
+    prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
     # now we are ready to define the physics of this problem.
     physics = VoronoiFVM.Physics(;
         flux=function (f, u, edge, data)
@@ -194,8 +185,8 @@ function get_time_dependent_system(grid, parameters=:nothing)
     # 3 = cation concentration $c_c$
 
     # we compute the prefactor for the Poisson equation
-    r = parameters.pore_radius
-    prefactor = 1.0 / (4 * pi * r^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
+    L = parameters.pore_length
+    prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
     # we scale the diffusivities of the two concentration equations
     D_a_norm = parameters.D_anion / parameters.D_ref
     D_c_norm = parameters.D_cation / parameters.D_ref
@@ -286,7 +277,7 @@ function main(;
     inival[3, :] .= 1.0
     # time loop
     t_plot = 0.0
-    while time < 3000
+    while time < 1000
         if time > t_plot
             #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
             #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
@@ -333,7 +324,7 @@ function main(;
     println("Norm of J+ flux")
     println(sum(sum(abs.(nf[:, 3, :]))))
 
-    writeVTK("V0.2_R2nm_mesh0005_t3000.vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+    writeVTK("out", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
     return reveal(p)
 
 end

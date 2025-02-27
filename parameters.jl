@@ -2,15 +2,16 @@
 using Configurations
 
 @option struct Parameters
-    case::String = "test_case" # name of the case 
+    case::String = "h_20nm_r10nm_l50nmh20h" # name of the case 
     # the type of the PNP system. There is three different options to choose from
     # PNP : the classical Poisson-Nernst-Planck system without taking the size of the ions into account.
     # MPNP: the size of the ions is taken into account but with a single constant size parameters (i.e. both ions are assumed to have the same size.)
     # SMPNP: each of the two ions has a differnt size
     PNP_mode::String = "SMPNP" |> validate_PNP_mode
     D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
-    pore_radius::Float64 = 1.5e-9 # pore radius [meter]
+    pore_radius::Float64 = 10e-9 # pore radius [meter]
     pore_length::Float64 = 50e-9 # pore length [meter]
+    reservoir_height::Float64 = 120e-9 # reservoir height [meter]
     cation_size::Float64 = 5e-10 # cation size [meter]
     anion_size::Float64 = 5e-10 # cation size [meter]
     solvent_molecule_size::Float64 = 5e-10
