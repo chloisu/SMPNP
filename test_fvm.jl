@@ -15,34 +15,13 @@ using YAML
 using Configurations
 include("constants.jl")
 include("analytical_solutions.jl")
-include("parameters.jl")  # Include the parameters file
+include("parameters.jl")
 include("chemical_potential.jl")
-#using .ParametersModule  # Use the module
-#using Configurations
-#@option struct Parameters
-#    case::String = "test_case" # name of the case 
-#    D_ref::Float64 = 5e-9 # reference diffusivity [m^2/s]
-#    pore_radius::Float64 = 5e-9 # pore radius [meter]
-#    pore_length::Float64 = 50e-9 # pore length [meter]
-#    #cation_size::Float64 = 1e-10 # cation size [meter]
-#    #anion_size::Float64 = 1e-10 # cation size [meter]
-#    D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
-#    D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
-#    surface_potential::Float64 = 0.01 # surface potential [V]
-#    #c_0::Float64 = 1 # initial concentration [mol/L]
-#    #max_iter::Int = 20 # maximum nonlinear Newton iterations 
-#    #dt::Float64 = 1e-6 # timestep
-#    #dt_max::Float64 = 2e-1 # maximum timestep
-#    #t_final::Float64 = 1 # final time
-#end
 
-function load_config_file(filename)
-    # Define a struct for your configuration
-    file = YAML.load_file(filename; dicttype=Dict{String,Any})
-    parameters = from_dict(Parameters, file) # parse the 
-    return parameters
-end
 
+"""
+this function generates the 2D grid of the simulation with the pore geometry and the refinement towards the pore wall.
+"""
 function generate_grid_2d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.pore_radius / parameters.pore_radius
@@ -50,7 +29,7 @@ function generate_grid_2d(parameters)
     # we will generate a bounding box that goes from 0 to 3l with the middle l section to be the pore
     # for the radius, we will have the tube at the top with a total height of l
     builder = SimplexGridBuilder(; Generator=Triangulate)
-    cellregion!(builder, 1)
+    cellregion!(builder, 1) # this is our inside domain
     p1 = point!(builder, 0, 0)
     p2 = point!(builder, l, 0)
     p3 = point!(builder, l, l - r)
@@ -78,7 +57,9 @@ function generate_grid_2d(parameters)
     facetregion!(builder, 5)
     facet!(builder, p7, p8)
 
-
+    """
+    this function returns a bool telling us which cells need refinement.
+    """
     function unsuitable(x1, y1, x2, y2, x3, y3, area)
         bary = [(x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3]
         needs_refinement = 0
@@ -88,7 +69,7 @@ function generate_grid_2d(parameters)
         rf_x = max(min_x, min(bary[1], max_x))
         refinement_center = [rf_x, l - r]
         dist = norm(bary - refinement_center)
-        if area > 0.01 * dist
+        if area > 0.005 * dist
             needs_refinement = 1
         end
         ## towards the right wall
@@ -109,12 +90,16 @@ function generate_grid_2d(parameters)
     return grid
 end
 
+"""
+simple 1D grid
+"""
 function generate_grid_1d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.pore_radius / parameters.pore_radius
     X = collect(0:0.001:r)
     return simplexgrid(X)
 end
+
 
 function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
     # we add the boundary conditions
@@ -301,7 +286,7 @@ function main(;
     inival[3, :] .= 1.0
     # time loop
     t_plot = 0.0
-    while time < 2000
+    while time < 3000
         if time > t_plot
             #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
             #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
@@ -348,7 +333,7 @@ function main(;
     println("Norm of J+ flux")
     println(sum(sum(abs.(nf[:, 3, :]))))
 
-    writeVTK("test.vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+    writeVTK("V0.2_R2nm_mesh0005_t3000.vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
     return reveal(p)
 
 end

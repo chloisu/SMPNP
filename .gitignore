@@ -1,4 +1,7 @@
 *.png
 *.jpg
+*.vtu
+*.vtk
+*.csv
 test*.jl
 scratch.jl
