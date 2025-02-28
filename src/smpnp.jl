@@ -18,21 +18,13 @@ using LinearAlgebra
 using YAML
 using Configurations
 using Metal
+using ArgParse
+
 include("constants.jl")
 include("parameters.jl")
 include("chemical_potential.jl")
 include("mesh.jl")
 
-
-"""
-simple 1D grid
-"""
-function generate_grid_1d(parameters)
-    # first, we normalize the geometry inputs
-    r = parameters.pore_radius / parameters.pore_length
-    X = collect(0:0.001:r)
-    return simplexgrid(X)
-end
 
 
 function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
@@ -172,12 +164,45 @@ function get_time_dependent_system(grid, parameters=:nothing)
     return sys
 end
 
+"""
+function to parse the command line arguments of the code.
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function parse_args()
+    s = ArgParseSettings()
+    @add_arg_table! s begin
+        "--parameters", "-p"
+        help = "Path to the parameter .yml file."
+        arg_type = String
+        required = true
+        #"--verbose", "-v"
+        #help = "Enable verbose mode"
+        #action = :store_true  # Boolean flag
+        #"--output", "-o"
+        #help = "Output file path"
+        #arg_type = String
+        #default = "output.txt"
+    end
+    # Make a copy of ARGS to avoid modifying it directly
+    args = copy(ARGS)
+
+    # If the first argument is present but does not start with "--", assume it is --parameters
+    if !isempty(args) && !startswith(args[1], "--")
+        args = vcat(["--parameters"], args)  # Prepend `--parameters`
+    end
+
+    parsed_args = ArgParse.parse_args(args, s)
+    return parsed_args
+end
+
 function main(;
     n=10, Plotter=nothing, verbose=false, unknown_storage=:sparse,
     method_linear=nothing, assembly=:edgewise
 )
+    # the very first thing we do is parse the command line arguments
+    args = parse_args()
     # load the parameter file 
-    parameters = load_config_file("test.yml")
+    parameters = load_config_file(args["parameters"])
 
     # generate grid
     grid = generate_grid_2d(parameters)
@@ -268,11 +293,10 @@ function main(;
     println(sum(sum(abs.(nf[:, 3, :]))))
 
     writeVTK("out", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
-    return reveal(p)
+    return 0
 
 end
 
-GC.gc()  # Force garbage collection
-using GLMakie
-p = main(Plotter=GLMakie, verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
-GLMakie.save(joinpath(".", "out.jpg"), p)  #hide
+
+
+main(verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
