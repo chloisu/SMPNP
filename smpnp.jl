@@ -4,7 +4,7 @@ ENV["JULIA_NUM_THREADS"] = 1
 using Printf
 using VoronoiFVM
 using ExtendableGrids
-using ExtendableSparse: ILUZeroPreconBuilder
+using ExtendableSparse
 using GridVisualize
 using LinearSolve
 using ILUZero
@@ -13,6 +13,7 @@ using SimplexGridFactory
 using LinearAlgebra
 using YAML
 using Configurations
+using Metal
 include("constants.jl")
 include("analytical_solutions.jl")
 include("parameters.jl")
@@ -249,7 +250,7 @@ function main(;
     control.reltol_linear = 1.0e-8
     control.abstol = 1e-6
     control.method_linear = method_linear
-    control.maxiters = 20
+    control.maxiters = 5
 
     tstep = 1e-6
     time = 0
@@ -291,7 +292,7 @@ function main(;
             time = time + tstep
             inival .= U
             tstep *= 2
-            tstep = min(tstep, 2)
+            tstep = min(tstep, 20)
         catch error
             tstep *= 0.5
             print("Repeating timestep at time: ")
@@ -331,5 +332,5 @@ end
 
 GC.gc()  # Force garbage collection
 using GLMakie
-p = main(Plotter=GLMakie, verbose=true)
+p = main(Plotter=GLMakie, verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
 GLMakie.save(joinpath(".", "out.jpg"), p)  #hide

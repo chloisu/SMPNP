@@ -4,4 +4,6 @@
 *.vtk
 *.csv
 test*.jl
+*.python-version
+*.svg
 scratch.jl
