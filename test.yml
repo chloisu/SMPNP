@@ -1,1 +1,8 @@
-case : "test_case"
+case: "test_case"
+grid_type: "nano_slit_with_reservoirs_2d"
+
+grid:
+  nano_slit_with_reservoirs_2d:
+    pore_radius : 10e-9
+    pore_length : 50e-9
+    reservoir_height: 80e-9

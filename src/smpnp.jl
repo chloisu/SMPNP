@@ -23,8 +23,8 @@ using ArgParse
 include("constants.jl")
 include("parameters.jl")
 include("chemical_potential.jl")
-include("mesh.jl")
-
+include("grid.jl")
+include("utils.jl")
 
 
 function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
@@ -203,11 +203,15 @@ function main(;
     args = parse_args()
     # load the parameter file 
     parameters = load_config_file(args["parameters"])
-
+    # next, we want to generate the output directory
+    output_dir = create_output_directory(parameters)
+    # Save parameters to YAML
+    save_parameters_to_yaml(parameters, output_dir)
     # generate grid
-    grid = generate_grid_2d(parameters)
-    p = gridplot(grid; Plotter, size=(3000, 1000))
+    grid = get_grid(parameters.grid_type, parameters)
 
+    #grid = generate_grid_2d(parameters)
+    p = gridplot(grid; Plotter, size=(3000, 1000))
 
     sys = get_initial_timestep_system(grid, parameters)
     initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
