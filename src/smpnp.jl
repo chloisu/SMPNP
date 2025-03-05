@@ -189,7 +189,7 @@ function main(;
     # solve the initial condition
     Δt = 1e-6
     time = 0
-    U = solve(sys; control, Δt)
+    U = solve(sys; control, tstep=Δt)
     initial_potential = U[1, :]
     writeVTK("out", grid, phi=U[1, :])
 
