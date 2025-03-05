@@ -13,7 +13,7 @@ equation for the potential distribution.
 function get_initial_timestep_system(grid, parameters)
     # we setup the physics for the poisson system only
     # we compute the prefactor for the Poisson equation
-    L = parameters.non_dim.L_REF
+    L = parameters.pore_length
     prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
     # now we are ready to define the physics of this problem.
     physics = VoronoiFVM.Physics(;
@@ -38,11 +38,11 @@ function get_time_dependent_system(grid, parameters=:nothing)
     # 3 = cation concentration $c_c$
 
     # we compute the prefactor for the Poisson equation
-    L = parameters.non_dim.L_REF
+    L = parameters.pore_length
     prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
     # we scale the diffusivities of the two concentration equations
-    D_a_norm = parameters.D_anion / parameters.non_dim.D_REF
-    D_c_norm = parameters.D_cation / parameters.non_dim.D_REF
+    D_a_norm = parameters.D_anion / parameters.D_REF
+    D_c_norm = parameters.D_cation / parameters.D_REF
 
     physics = VoronoiFVM.Physics(
         ; reaction=function (f, u, node, data)

@@ -167,7 +167,7 @@ function main(;
     # Save parameters to YAML
     save_parameters_to_yaml(parameters, output_dir)
     # generate grid
-    grid = get_grid(parameters.grid_type, parameters)
+    grid = get_grid(parameters.grid_type, parameters)#generate_grid_2d(parameters)#
 
     p = gridplot(grid; Plotter, size=(3000, 1000))
 
@@ -188,11 +188,11 @@ function main(;
     #setup_solver_control!(control, parameters)
     # solve the initial condition
     Δt = 1e-6
+    time = 0
     U = solve(sys; control, Δt)
     initial_potential = U[1, :]
     writeVTK("out", grid, phi=U[1, :])
 
-    time = 0.0
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
@@ -202,11 +202,11 @@ function main(;
         clear=true)
 
     # setup the time parameters correclty
-    setup_time_parameters!(parameters)
+    #setup_time_parameters!(parameters)
 
-    time_dependent_system = get_time_dependent_system(grid, parameters)
+    sys2 = get_time_dependent_system(grid, parameters)
     #apply_dirichlet_for_time_dependent!(time_dependent_system, parameters)
-    time_dependent_initial_and_boundary_conditions_2d!(time_dependent_system, initial_potential, parameters)
+    time_dependent_initial_and_boundary_conditions_2d!(sys2, initial_potential, parameters)
     #
     #U_current_timestep = apply_initial_condition_for_time_dependent!(time_dependent_system, parameters, initial_potential)
     #U_current_timestep = unknowns(time_dependent_system)
@@ -216,7 +216,7 @@ function main(;
     #U_previous_timestep = zeros(size(U_current_timestep))
     #U_previous_timestep .= U_current_timestep
     #time_dependent_initial_and_boundary_conditions_2d!(time_dependent_system, initial_potential, parameters)
-    inival = unknowns(time_dependent_system)
+    inival = unknowns(sys2)
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
@@ -233,12 +233,11 @@ function main(;
         try
             print("Solving timestep at time: ")
             println(time)
-            println(Δt)
-            U_current_timestep = solve(time_dependent_system; inival, control, Δt)
+            U = solve(sys2; inival, control, tstep=Δt)
             time = time + Δt
-            inival .= U_current_timestep
+            inival .= U
             Δt *= 2
-            Δt = min(Δt, 20)#parameters.time_parameters.max_timestep)
+            Δt = min(Δt, 20)
         catch error
             Δt *= 0.5
             print("Repeating timestep at time: ")

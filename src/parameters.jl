@@ -13,6 +13,10 @@
     PNP_mode::String = "SMPNP" |> validate_PNP_mode
     grid_type::String = "equally_spaced_1d"
     grid::GridParameters = GridParameters()
+    pore_radius::Float64 = 10e-9 # pore radius [meter]
+    pore_length::Float64 = 50e-9 # pore length [meter]
+    reservoir_height::Float64 = 80e-9
+    D_REF::Float64 = 5e-9
     cation_size::Float64 = 5e-10 # cation size [meter]
     anion_size::Float64 = 5e-10 # cation size [meter]
     solvent_molecule_size::Float64 = 5e-10
@@ -25,11 +29,11 @@
     # based on these quantities, we can then also run the post-processing
     # steps to convert back any non-dimensional results to 
     # dimensional units.
-    non_dim::NonDimensionalization = NonDimensionalization()
+    #non_dim::NonDimensionalization = NonDimensionalization()
     boundary_conditions::BoundaryConditions = BoundaryConditions()
     initial_conditions::InitialConditions = InitialConditions()
-    solver_parameters::SolverParameters = SolverParameters()
-    time_parameters::TimeParameters = TimeParameters()
+    #solver_parameters::SolverParameters = SolverParameters()
+    #time_parameters::TimeParameters = TimeParameters()
     #L_REF::Float64 = pore_length # reference lengthscale in [meter]
     #C_REF::Float64 = 1 # reference concentration in [mol / L]
     #D_REF::Float64 = 5e-9 # reference diffusivity [m^2/s]
