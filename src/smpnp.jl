@@ -173,9 +173,9 @@ function main(;
 
     sys = get_initial_timestep_system(grid, parameters)
 
-    #initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
-    apply_dirichlet_for_initial_timestep!(sys, parameters)
-    apply_initial_conditions_for_intial_timestep!(sys, parameters)
+    initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+    #apply_dirichlet_for_initial_timestep!(sys, parameters)
+    #apply_initial_conditions_for_intial_timestep!(sys, parameters)
 
     #control = VoronoiFVM.SolverControl()
     control = VoronoiFVM.NewtonControl()
