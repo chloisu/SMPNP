@@ -3,7 +3,6 @@
 # 
 # This file is part of SMPNP
 # 
-using ExtendableGrids
 
 """
 This file implements the different grid types that we cover.

@@ -1,5 +1,3 @@
-include("parameters.jl")
-
 """
 this function returns the chemical potential for a given species 
 
@@ -9,7 +7,6 @@ function μ(c1, c2, z1, ϕ, parameters::Parameters)
     if parameters.PNP_mode == "PNP"
         μ1 = rlog(c1) + z1 * ϕ
     end
-
     #if parameters.PNP_mode == "MPNP"
     #
     #end

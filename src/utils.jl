@@ -31,3 +31,51 @@ function save_parameters_to_yaml(params, output_dir)
     YAML.write_file(output_file, d)
 end
 
+"""
+    rlog(u; eps=1.0e-20)
+
+Regularized logarithm. Smooth linear continuation for `x<eps`.
+This means we can calculate a "logarithm"  of a small negative number.
+"""
+function rlog(x; eps=1.0e-20)
+    if x < eps
+        return log(eps) + (x - eps) / eps
+    else
+        return log(x)
+    end
+end
+"""
+rexp(x;trunc=500.0)
+
+Regularized exponential. Linear continuation for `x>trunc`,  
+returns 1/rexp(-x) for `x<-trunc`.
+"""
+function rexp(x; trunc=500.0)
+    if x < -trunc
+        1.0 / rexp(-x; trunc)
+    elseif x <= trunc
+        exp(x)
+    else
+        exp(trunc) * (x - trunc + 1)
+    end
+end
+
+
+""" 
+Custom Error messages
+"""
+struct InputError <: Exception
+    msg::String
+end
+
+function Base.showerror(io::IO, e::InputError)
+    print(io, "InputError: ", e.msg)
+end
+
+struct ParameterError <: Exception
+    msg::String
+end
+
+function Base.showerror(io::IO, e::ParameterError)
+    print(io, "ParameterError: ", e.msg)
+end

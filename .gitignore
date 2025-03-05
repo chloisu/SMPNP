@@ -7,3 +7,5 @@ test*.jl
 *.python-version
 *.svg
 scratch.jl
+output**/**
+**/output**/**

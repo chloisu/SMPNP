@@ -16,30 +16,13 @@ function validate_PNP_mode(mode::String)
 end
 
 """
-    rlog(u; eps=1.0e-20)
+This enum is to specify the solver which primary is assigned to what 
+index in the solver. This also allows us to quickly switch this order
+if necessary.
+"""
+const PHI_EQ = 1
+const ANION_EQ = 2
+const CATION_EQ = 3
+const NUM_SPECIES = 3
 
-Regularized logarithm. Smooth linear continuation for `x<eps`.
-This means we can calculate a "logarithm"  of a small negative number.
-"""
-function rlog(x; eps=1.0e-20)
-    if x < eps
-        return log(eps) + (x - eps) / eps
-    else
-        return log(x)
-    end
-end
-"""
-rexp(x;trunc=500.0)
-
-Regularized exponential. Linear continuation for `x>trunc`,  
-returns 1/rexp(-x) for `x<-trunc`.
-"""
-function rexp(x; trunc=500.0)
-    if x < -trunc
-        1.0 / rexp(-x; trunc)
-    elseif x <= trunc
-        exp(x)
-    else
-        exp(trunc) * (x - trunc + 1)
-    end
-end
+const DEFAULT_INITIAL_CONDITIONS = [0.0, 1.0, 1.0]

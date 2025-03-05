@@ -4,11 +4,6 @@
 # This file is part of SMPNP
 # 
 
-using Configurations
-include("constants.jl")
-include("config.jl")
-include("grid.jl")
-
 @option struct Parameters
     case::String = "h_20nm_r10nm_l50nmh20h" # name of the case 
     # the type of the PNP system. There is three different options to choose from
@@ -30,6 +25,11 @@ include("grid.jl")
     # based on these quantities, we can then also run the post-processing
     # steps to convert back any non-dimensional results to 
     # dimensional units.
+    non_dim::NonDimensionalization = NonDimensionalization()
+    boundary_conditions::BoundaryConditions = BoundaryConditions()
+    initial_conditions::InitialConditions = InitialConditions()
+    solver_parameters::SolverParameters = SolverParameters()
+    time_parameters::TimeParameters = TimeParameters()
     #L_REF::Float64 = pore_length # reference lengthscale in [meter]
     #C_REF::Float64 = 1 # reference concentration in [mol / L]
     #D_REF::Float64 = 5e-9 # reference diffusivity [m^2/s]

@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 [![Python Version](https://img.shields.io/badge/python-3.10.16%2B-blue)](#prerequisites)  
 
-## **\ud83d\udcda Overview**
+## **Overview**
 This repository contains the source code for the research project **"[Your Research Paper Title]"**, which was published in **[Journal/Conference Name]**. The code is designed to **[briefly describe functionality, e.g., numerical simulations, data processing, machine learning, etc.]**.
 
 \ud83d\udcdd **Paper DOI**: [Insert DOI]  
@@ -96,11 +96,11 @@ $$
 ## **\u25b6\ufe0f Usage**
 ### **Running the main script**
 ```sh
-python src/main.py --input data/sample.csv --output results/output.csv
+julia --project=. ./src/smpnp.jl input.yml
 ```
 **Arguments:**
-- `--input`: Path to the input data file.
-- `--output`: Path to save the processed results.
+- `--paramaters` or `-p`: Path to the input data file.
+- `--help` or `-h`: Display help information
 
 ### **Example**
 ```sh

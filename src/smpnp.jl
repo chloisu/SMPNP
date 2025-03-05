@@ -21,11 +21,17 @@ using Metal
 using ArgParse
 
 include("constants.jl")
-include("parameters.jl")
-include("chemical_potential.jl")
+include("config.jl")
+include("nondimensionalization.jl")
 include("grid.jl")
 include("utils.jl")
-
+include("boundary_conditions.jl")
+include("initial_conditions.jl")
+include("solver_config.jl")
+include("time_config.jl")
+include("parameters.jl")
+include("chemical_potential.jl")
+include("physics.jl")
 
 function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
     # we add the boundary conditions
@@ -68,6 +74,7 @@ function time_dependent_initial_and_boundary_conditions_2d!(sys, initial_potenti
     U[1, :] = initial_potential
     U[2, :] .= 1.0
     U[3, :] .= 1.0
+
 end
 function time_dependent_initial_and_boundary_conditions_1d!(sys, initial_potential, parameters)
     # potential boundary conditions
@@ -86,83 +93,6 @@ function time_dependent_initial_and_boundary_conditions_1d!(sys, initial_potenti
     U[3, :] .= 1.0
 end
 
-
-"""
-    get_initial_timestep_system(config)
-
-returns a VoronoiFVM.System to solve the initial poisson 
-equation for the potential distribution.
-"""
-function get_initial_timestep_system(grid, parameters)
-    # we setup the physics for the poisson system only
-    # we compute the prefactor for the Poisson equation
-    L = parameters.pore_length
-    prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
-    # now we are ready to define the physics of this problem.
-    physics = VoronoiFVM.Physics(;
-        flux=function (f, u, edge, data)
-            f[1] = prefactor * (u[1, 1] - u[1, 2])
-            return nothing
-        end
-    )
-    sys = VoronoiFVM.System(grid, physics; is_linear=false, unknown_storage=:sparse, assembly=:edgewise)
-    # we add the potential 'species'
-    enable_species!(sys, 1, [1])
-    return sys
-end
-
-
-function get_time_dependent_system(grid, parameters=:nothing)
-    # this system describes the phyiscs of the time-dependent PNP equations
-    # the index of the different species are 
-    # 1 = potential $\phi$
-    # 2 = anion concentration $c_a$
-    # 3 = cation concentration $c_c$
-
-    # we compute the prefactor for the Poisson equation
-    L = parameters.pore_length
-    prefactor = 1.0 / (4 * pi * L^2 * L_B * MOL_PER_LITER_TO_PER_CUBIC_METER)
-    # we scale the diffusivities of the two concentration equations
-    D_a_norm = parameters.D_anion / parameters.D_ref
-    D_c_norm = parameters.D_cation / parameters.D_ref
-
-    physics = VoronoiFVM.Physics(
-        ; reaction=function (f, u, node, data)
-            # source term of the poisson equation
-            f[1] = -(Z_ANION * u[2] + Z_CATION * u[3])
-            return nothing
-        end,
-        flux=function (f, u, edge, data)
-            # compute the chemical potentials for the two cells
-            μ_anion1 = μ(u[2, 1], u[3, 1], Z_ANION, u[1, 1], parameters)
-            μ_anion2 = μ(u[2, 2], u[3, 2], Z_ANION, u[1, 2], parameters)
-
-            μ_cation1 = μ(u[3, 1], u[2, 1], Z_CATION, u[1, 1], parameters)
-            μ_cation2 = μ(u[3, 2], u[2, 2], Z_CATION, u[1, 2], parameters)
-            # potential flux is simple poisson
-            f[1] = prefactor * (u[1, 1] - u[1, 2])
-            # anion flux is diffusion + migration
-            c_anion_interface = 0.5 * (u[2, 1] + u[2, 2])
-            f[2] = D_a_norm * c_anion_interface * (μ_anion1 - μ_anion2)#(((u[2, 1] - u[2, 2]) + c_anion_interface * Z_ANION * (u[1, 1] - u[1, 2])))
-            # cation flux is diffusion + migration
-            c_cation_interface = 0.5 * (u[3, 1] + u[3, 2])
-            f[3] = D_c_norm * c_cation_interface * (μ_cation1 - μ_cation2)#((u[3, 1] - u[3, 2]) + c_cation_interface * Z_CATION * (u[1, 1] - u[1, 2]))
-            return nothing
-        end,
-        storage=function (f, u, node, data)
-            # time derivative for concentrations
-            f[2] = u[2]
-            f[3] = u[3]
-            return nothing
-        end
-    )
-
-    sys = VoronoiFVM.System(grid, physics; is_linear=false, unknown_storage=:sparse, assembly=:edgewise)
-    enable_species!(sys, 1, [1]) # add potential
-    enable_species!(sys, 2, [1]) # add anion
-    enable_species!(sys, 3, [1]) # add cation
-    return sys
-end
 
 """
 function to parse the command line arguments of the code.
@@ -195,6 +125,35 @@ function parse_args()
     return parsed_args
 end
 
+"""
+this is a small custom function to check if we are done with the time loop of the simulation.
+That depends on whether or not we solve for a specific final time or for the steady state.
+"""
+function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters)
+    # check if we have even started
+    if current_time < parameters.time_parameters.initial_timestep
+        return true
+    end
+    # else we check the conditions
+    if parameters.time_parameters.solve_to_steady_state
+        # check if we have reached the steady state
+        if norm(U_current_timestep - U_previous_timestep, Inf) > parameters.time_parameters.steady_state_tol
+            return true
+        else
+            # we are done
+            return false
+        end
+    else
+        # have we reached the final time
+        if current_time < parameters.time_parameters.final_time
+            return true
+        else
+            # we are done
+            return false
+        end
+    end
+end
+
 function main(;
     n=10, Plotter=nothing, verbose=false, unknown_storage=:sparse,
     method_linear=nothing, assembly=:edgewise
@@ -210,12 +169,15 @@ function main(;
     # generate grid
     grid = get_grid(parameters.grid_type, parameters)
 
-    #grid = generate_grid_2d(parameters)
     p = gridplot(grid; Plotter, size=(3000, 1000))
 
     sys = get_initial_timestep_system(grid, parameters)
-    initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
 
+    #initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+    apply_dirichlet_for_initial_timestep!(sys, parameters)
+    apply_initial_conditions_for_intial_timestep!(sys, parameters)
+
+    #control = VoronoiFVM.SolverControl()
     control = VoronoiFVM.NewtonControl()
     control.verbose = verbose
     control.reltol_linear = 1.0e-8
@@ -223,10 +185,14 @@ function main(;
     control.method_linear = method_linear
     control.maxiters = 5
 
-    tstep = 1e-6
-    time = 0
-    U = solve(sys; control, tstep)
+    #setup_solver_control!(control, parameters)
+    # solve the initial condition
+    Δt = 1e-6
+    U = solve(sys; control, Δt)
     initial_potential = U[1, :]
+    writeVTK("out", grid, phi=U[1, :])
+
+    time = 0.0
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
@@ -234,22 +200,30 @@ function main(;
         Plotter,
         layout=(3, 1),
         clear=true)
-    #scalarplot!(p[1, 1], grid, initial_potential, clear=true, show=true)
 
-    # now solve the time-dependent once
-    control2 = VoronoiFVM.NewtonControl()
-    #control2.verbose = verbose
-    control2.reltol_linear = 1.0e-8
-    control2.method_linear = method_linear
-    sys2 = get_time_dependent_system(grid, parameters)
-    time_dependent_initial_and_boundary_conditions_2d!(sys2, initial_potential, parameters)
-    inival = unknowns(sys2)
+    # setup the time parameters correclty
+    setup_time_parameters!(parameters)
+
+    time_dependent_system = get_time_dependent_system(grid, parameters)
+    #apply_dirichlet_for_time_dependent!(time_dependent_system, parameters)
+    time_dependent_initial_and_boundary_conditions_2d!(time_dependent_system, initial_potential, parameters)
+    #
+    #U_current_timestep = apply_initial_condition_for_time_dependent!(time_dependent_system, parameters, initial_potential)
+    #U_current_timestep = unknowns(time_dependent_system)
+    #U_current_timestep[1, :] = initial_potential
+    #U_current_timestep[2, :] .= 1.0
+    #U_current_timestep[3, :] .= 1.0
+    #U_previous_timestep = zeros(size(U_current_timestep))
+    #U_previous_timestep .= U_current_timestep
+    #time_dependent_initial_and_boundary_conditions_2d!(time_dependent_system, initial_potential, parameters)
+    inival = unknowns(time_dependent_system)
     inival[1, :] = initial_potential
     inival[2, :] .= 1.0
     inival[3, :] .= 1.0
     # time loop
     t_plot = 0.0
-    while time < 1000
+    Δt = 1e-6#parameters.time_parameters.initial_timestep
+    while time < 1000#check_if_stay_in_time_loop(time, U_current_timestep, U_previous_timestep, parameters)
         if time > t_plot
             #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
             #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
@@ -259,22 +233,23 @@ function main(;
         try
             print("Solving timestep at time: ")
             println(time)
-            U = solve(sys2; inival, control, tstep)
-            time = time + tstep
-            inival .= U
-            tstep *= 2
-            tstep = min(tstep, 20)
+            println(Δt)
+            U_current_timestep = solve(time_dependent_system; inival, control, Δt)
+            time = time + Δt
+            inival .= U_current_timestep
+            Δt *= 2
+            Δt = min(Δt, 20)#parameters.time_parameters.max_timestep)
         catch error
-            tstep *= 0.5
+            Δt *= 0.5
             print("Repeating timestep at time: ")
             println(time)
             print("with timestep: ")
-            println(tstep)
+            println(Δt)
             # this means we didn't converge, so we will decrease the timestep
         end
 
     end
-    nf = nodeflux(sys2, U)
+    nf = nodeflux(time_dependent_system, U)
     surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
     #f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
     #ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
