@@ -4,11 +4,11 @@ This is a small wrapper to make the solver arguments of VoronoiFVM.SolverControl
 parameter file.
 """
 @option struct SolverParameters
-    verbose::Union{Bool,String} = false
-    abstol::Float64 = 1.0e-10
+    verbose::Union{Bool,String} = true
+    abstol::Float64 = 1.0e-6
     reltol::Float64 = 1.0e-10
-    maxiters::Int = 100
-    reltol_linear::Float64 = 1.0e-4
+    maxiters::Int = 5
+    reltol_linear::Float64 = 1.0e-8
     abstol_linear::Float64 = 1.0e-8
     method_linear::Union{Nothing,LinearSolve.SciMLLinearSolveAlgorithm} = nothing
 end

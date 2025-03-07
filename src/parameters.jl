@@ -29,11 +29,11 @@
     # based on these quantities, we can then also run the post-processing
     # steps to convert back any non-dimensional results to 
     # dimensional units.
-    #non_dim::NonDimensionalization = NonDimensionalization()
+    non_dim::NonDimensionalization = NonDimensionalization()
     boundary_conditions::BoundaryConditions = BoundaryConditions()
     initial_conditions::InitialConditions = InitialConditions()
-    #solver_parameters::SolverParameters = SolverParameters()
-    #time_parameters::TimeParameters = TimeParameters()
+    solver_parameters::SolverParameters = SolverParameters()
+    time_parameters::TimeParameters = TimeParameters()
     #L_REF::Float64 = pore_length # reference lengthscale in [meter]
     #C_REF::Float64 = 1 # reference concentration in [mol / L]
     #D_REF::Float64 = 5e-9 # reference diffusivity [m^2/s]

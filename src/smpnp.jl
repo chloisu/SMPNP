@@ -36,7 +36,7 @@ include("physics.jl")
 function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
     # we add the boundary conditions
     # we scale the surface potential to the correct value
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    surface_potential_norm = 11.8#parameters.surface_potential * E_CHARGE * BETA
     boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
     #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
     boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
@@ -58,7 +58,7 @@ end
 
 function time_dependent_initial_and_boundary_conditions_2d!(sys, initial_potential, parameters)
     # potential boundary conditions
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
+    surface_potential_norm = 11.8#parameters.surface_potential * E_CHARGE * BETA
     boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
     #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
     boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
@@ -173,19 +173,19 @@ function main(;
 
     sys = get_initial_timestep_system(grid, parameters)
 
-    initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
-    #apply_dirichlet_for_initial_timestep!(sys, parameters)
-    #apply_initial_conditions_for_intial_timestep!(sys, parameters)
+    #initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+    apply_dirichlet_for_initial_timestep!(sys, parameters)
+    apply_initial_conditions_for_intial_timestep!(sys, parameters)
 
-    #control = VoronoiFVM.SolverControl()
-    control = VoronoiFVM.NewtonControl()
-    control.verbose = verbose
-    control.reltol_linear = 1.0e-8
-    control.abstol = 1e-6
-    control.method_linear = method_linear
-    control.maxiters = 5
+    control = VoronoiFVM.SolverControl()
+    #control = VoronoiFVM.NewtonControl()
+    #control.verbose = verbose
+    #control.reltol_linear = 1.0e-8
+    #control.abstol = 1e-6
+    #control.method_linear = method_linear
+    #control.maxiters = 5
 
-    #setup_solver_control!(control, parameters)
+    setup_solver_control!(control, parameters)
     # solve the initial condition
     Δt = 1e-6
     time = 0
@@ -202,28 +202,18 @@ function main(;
         clear=true)
 
     # setup the time parameters correclty
-    #setup_time_parameters!(parameters)
+    setup_time_parameters!(parameters)
 
     sys2 = get_time_dependent_system(grid, parameters)
-    #apply_dirichlet_for_time_dependent!(time_dependent_system, parameters)
-    time_dependent_initial_and_boundary_conditions_2d!(sys2, initial_potential, parameters)
-    #
-    #U_current_timestep = apply_initial_condition_for_time_dependent!(time_dependent_system, parameters, initial_potential)
-    #U_current_timestep = unknowns(time_dependent_system)
-    #U_current_timestep[1, :] = initial_potential
-    #U_current_timestep[2, :] .= 1.0
-    #U_current_timestep[3, :] .= 1.0
-    #U_previous_timestep = zeros(size(U_current_timestep))
-    #U_previous_timestep .= U_current_timestep
-    #time_dependent_initial_and_boundary_conditions_2d!(time_dependent_system, initial_potential, parameters)
-    inival = unknowns(sys2)
-    inival[1, :] = initial_potential
-    inival[2, :] .= 1.0
-    inival[3, :] .= 1.0
+    apply_dirichlet_for_time_dependent!(sys2, parameters)
+    U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)
+    U_previous_timestep = similar(U)
+    U_previous_timestep .= U
+
     # time loop
     t_plot = 0.0
-    Δt = 1e-6#parameters.time_parameters.initial_timestep
-    while time < 1000#check_if_stay_in_time_loop(time, U_current_timestep, U_previous_timestep, parameters)
+    Δt = parameters.time_parameters.initial_timestep
+    while time < 1#check_if_stay_in_time_loop(time, U, U_previous_timestep, parameters)
         if time > t_plot
             #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
             #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
@@ -233,11 +223,11 @@ function main(;
         try
             print("Solving timestep at time: ")
             println(time)
-            U = solve(sys2; inival, control, tstep=Δt)
+            U = solve(sys2; inival=U_previous_timestep, control=control, tstep=Δt)
             time = time + Δt
-            inival .= U
+            U_previous_timestep .= U
             Δt *= 2
-            Δt = min(Δt, 20)
+            Δt = min(Δt, parameters.time_parameters.max_timestep)
         catch error
             Δt *= 0.5
             print("Repeating timestep at time: ")
