@@ -6,7 +6,6 @@ This function was generated with the help of ChatGPT (OpenAI).
 """
 function create_output_directory(params)
     output_dir = params.output_directory
-
     if isempty(output_dir)
         # Generate a default unique output directory
         base_name = "output_"

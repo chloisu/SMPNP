@@ -19,6 +19,7 @@ using YAML
 using Configurations
 using Metal
 using ArgParse
+using GLMakie
 
 include("constants.jl")
 include("config.jl")
@@ -155,10 +156,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
     end
 end
 
-function main(;
-    n=10, Plotter=nothing, verbose=false, unknown_storage=:sparse,
-    method_linear=nothing, assembly=:edgewise
-)
+function main()
     # the very first thing we do is parse the command line arguments
     args = parse_args()
     # load the parameter file 
@@ -169,58 +167,46 @@ function main(;
     save_parameters_to_yaml(parameters, output_dir)
     # generate grid
     grid = get_grid(parameters.grid_type, parameters)#generate_grid_2d(parameters)#
-
-    p = gridplot(grid; Plotter, size=(3000, 1000))
-
+    # output the grid as an image
+    # TODO: make the grid output nicer
+    vis = GridVisualizer(Plotter=GLMakie)
+    gridplot!(vis, grid; size=(3000, 1000))
+    GLMakie.save(joinpath(output_dir, "grid.png"), reveal(vis))
+    # setup the system for the initial timestep
     sys = get_initial_timestep_system(grid, parameters)
-
-    #initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
+    # specfiy boundary + initial conditions for the intial timestep
     apply_dirichlet_for_initial_timestep!(sys, parameters)
     apply_initial_conditions_for_intial_timestep!(sys, parameters)
-
+    # setup the Newton solver
     control = VoronoiFVM.SolverControl()
-    #control = VoronoiFVM.NewtonControl()
-    #control.verbose = verbose
-    #control.reltol_linear = 1.0e-8
-    #control.abstol = 1e-6
-    #control.method_linear = method_linear
-    #control.maxiters = 5
-
     setup_solver_control!(control, parameters)
     # solve the initial condition
-    Δt = 1e-6
-    time = 0
-    U = solve(sys; control, tstep=Δt)
+    U = solve(sys; control)
+    # write the initial potential distribution as VTK
+    @assert PHI_EQ == 1 # make sure that the potential species is the first species
     initial_potential = U[1, :]
     writeVTK("out", grid, phi=U[1, :])
-
+    # check if there are any nan values in the initial solution
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
-    p = GridVisualizer(;
-        Plotter,
-        layout=(3, 1),
-        clear=true)
 
     # setup the time parameters correclty
-    setup_time_parameters!(parameters)
+    setup_time_parameters!(parameters) # non dimensionalize some of the input parameters
+    time = 0.0
+    Δt = parameters.time_parameters.initial_timestep
+    t_plot = parameters.time_parameters.plot_time_interval
 
+    # setup the time-dependent system
     sys2 = get_time_dependent_system(grid, parameters)
+    # apply boundary and initial conditions
     apply_dirichlet_for_time_dependent!(sys2, parameters)
     U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)
+    # setup helper solution vector
     U_previous_timestep = similar(U)
     U_previous_timestep .= U
-
     # time loop
-    t_plot = 0.0
-    Δt = parameters.time_parameters.initial_timestep
-    while time < 1#check_if_stay_in_time_loop(time, U, U_previous_timestep, parameters)
-        if time > t_plot
-            #scalarplot!(p[1, 1], grid, U[1, :], xlimits=(0, 0.1), clear=false, show=true)
-            #scalarplot!(p[2, 1], grid, U[2, :], xlimits=(0, 0.1), clear=false, show=true)
-            #scalarplot!(p[3, 1], grid, U[3, :], xlimits=(0, 0.1), clear=false, show=true)
-            t_plot = t_plot + 0.01
-        end
+    while time < 100#check_if_stay_in_time_loop(time, U, U_previous_timestep, parameters)
         try
             print("Solving timestep at time: ")
             println(time)
@@ -228,46 +214,28 @@ function main(;
             time = time + Δt
             U_previous_timestep .= U
             Δt *= 2
-            Δt = min(Δt, parameters.time_parameters.max_timestep)
         catch error
+            # this means we didn't converge, so we will decrease the timestep
             Δt *= 0.5
             print("Repeating timestep at time: ")
             println(time)
             print("with timestep: ")
             println(Δt)
-            # this means we didn't converge, so we will decrease the timestep
         end
+        if time ≈ t_plot
+            nf = nodeflux(sys2, U)
+            filename = @sprintf("%.5f.vtu", time)
+            writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+            # next plot in
+            t_plot = t_plot + parameters.time_parameters.plot_time_interval
+        end
+        # decide on new timestep
+        Δt = min(min(Δt, parameters.time_parameters.max_timestep), t_plot - time)
 
     end
-    nf = nodeflux(time_dependent_system, U)
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    #f = potential_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
-    #ca, cc = concentrations_pb_1d(grid, surface_potential_norm, parameters.pore_radius)
-    scalarplot!(p[1, 1], grid, U[1, :], show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
-    vectorplot!(p[1, 1], grid, nf[:, 1, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
-
-    #scalarplot!(p[1, 1], grid, f, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
-
-    scalarplot!(p[2, 1], grid, U[2, :], clear=false, show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
-    vectorplot!(p[2, 1], grid, nf[:, 2, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
-
-    #scalarplot!(p[2, 1], grid, ca, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
-    scalarplot!(p[3, 1], grid, U[3, :], clear=false, show=true, xlimits=(5, 5.1), ylimits=(4, 4.1))
-    vectorplot!(p[3, 1], grid, nf[:, 3, :]; clear=false, vscale=1.5, xlimits=(5, 5.1), ylimits=(4, 4.1))
-    #scalarplot!(p[3, 1], grid, cc, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
-    println("Norm of J- flux")
-    println(sum(sum(abs.(nf[:, 2, :]))))
-
-    println("Norm of J+ flux")
-    println(sum(sum(abs.(nf[:, 3, :]))))
-
-    writeVTK("out", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+    # and we are done
     return 0
 
 end
 
-function multiply(a, b)
-    return a * b
-end
-
-main(verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
+main()#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
