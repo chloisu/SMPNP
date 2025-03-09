@@ -10,7 +10,8 @@
     # PNP : the classical Poisson-Nernst-Planck system without taking the size of the ions into account.
     # MPNP: the size of the ions is taken into account but with a single constant size parameters (i.e. both ions are assumed to have the same size.)
     # SMPNP: each of the two ions has a differnt size
-    PNP_mode::String = "SMPNP" |> validate_PNP_mode
+    PNP_mode::String = "SMPNP"
+    species_parameters::SpeciesParameters = SpeciesParameters()
     grid_type::String = "equally_spaced_1d"
     grid::GridParameters = GridParameters()
     pore_radius::Float64 = 10e-9 # pore radius [meter]
@@ -34,18 +35,6 @@
     initial_conditions::InitialConditions = InitialConditions()
     solver_parameters::SolverParameters = SolverParameters()
     time_parameters::TimeParameters = TimeParameters()
-    #L_REF::Float64 = pore_length # reference lengthscale in [meter]
-    #C_REF::Float64 = 1 # reference concentration in [mol / L]
-    #D_REF::Float64 = 5e-9 # reference diffusivity [m^2/s]
-    #T_REF::Float64 = L_REF^2 / D_REF
-    #PHI_REF::Float64 = K_B * T / E_CHARGE
-    # the following section allows the customization of the linear and 
-    # non-linear solvers. The arguments provided here are going to be passed 
-    # on to the Solver Control object of VoronoiFVM.
-    #max_iter::Int = 20 # maximum nonlinear Newton iterations 
-    #dt::Float64 = 1e-6 # timestep
-    #dt_max::Float64 = 2e-1 # maximum timestep
-    #t_final::Float64 = 1 # final time
 end
 
 """
@@ -59,5 +48,26 @@ function load_config_file(filename)
     # Define a struct for your configuration
     file = YAML.load_file(filename; dicttype=Dict{String,Any})
     parameters = from_dict(Parameters, file) # parse input parameters
-    return parameters
+    if check_parameters(parameters)
+        return parameters
+    else
+        print("error")
+    end
+end
+
+"""
+This function verifies the provided input parameters. It makes sure that the input arguments
+    provided are valid. It also provided error messages if they are not.
+"""
+function check_parameters(parameters)
+    # Validate the fields after parsing
+    validate_PNP_mode(parameters.PNP_mode)
+    validate_species_parameters(parameters.species_parameters)
+    validate_grid_type(parameters.grid_type)
+    validate_grid_parameters(parameters.grid_type, parameters)
+    validate_non_dim(parameters.non_dim)
+    validate_dirichlet_boundary_conditions(parameters.boundary_conditions.dirichlet)
+    validate_initial_conditions(parameters.initial_conditions)
+    validate_time_parameters(parameters.time_parameters)
+    return true
 end

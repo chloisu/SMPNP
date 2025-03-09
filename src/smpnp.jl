@@ -29,6 +29,7 @@ include("boundary_conditions.jl")
 include("initial_conditions.jl")
 include("solver_config.jl")
 include("time_config.jl")
+include("pnp_config.jl")
 include("parameters.jl")
 include("chemical_potential.jl")
 include("physics.jl")
@@ -269,4 +270,4 @@ function multiply(a, b)
     return a * b
 end
 
-#main(verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
+main(verbose=true)#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))

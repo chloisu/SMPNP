@@ -11,6 +11,11 @@ parameter file.
     initial_timestep::Float64 = 1e-12 # measured in [s]
 end
 
+function validate_time_parameters(params)
+    params.steady_state_tol > 0 || throw(ArgumentError("The steady-state tolerance must be larger than 0."))
+    params.initial_timestep <= params.max_timestep || throw(ArgumentError("The initial timestep must be <=  the maximum timestep."))
+end
+
 """
 take the parameters from the parameter file and use them to configure the solver
 """

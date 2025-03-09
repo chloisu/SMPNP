@@ -72,10 +72,25 @@ function Base.showerror(io::IO, e::InputError)
     print(io, "InputError: ", e.msg)
 end
 
+struct NotImplementedError <: Exception
+    msg::String
+end
+
+function Base.showerror(io::IO, e::NotImplementedError)
+    print(io, "NotImplementedError: ", e.msg)
+end
+
 struct ParameterError <: Exception
     msg::String
 end
 
 function Base.showerror(io::IO, e::ParameterError)
     print(io, "ParameterError: ", e.msg)
+end
+
+"""
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function are_sets_equal(v1, v2)
+    return length(v1) == length(v2) && Set(v1) == Set(v2)
 end

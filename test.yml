@@ -7,6 +7,11 @@ grid:
     pore_length : 50e-9
     reservoir_height: 80e-9
 
+species_parameters:
+  species : [2,3]
+  ion_sizes : [5e-10,5e-10]
+  diffusivities : [5e-9,5e-9]
+
 boundary_conditions:
   dirichlet:
     species : [1,2,3]

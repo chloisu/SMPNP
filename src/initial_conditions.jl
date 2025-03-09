@@ -10,6 +10,11 @@
     values::Vector{Float64} = DEFAULT_INITIAL_CONDITIONS # initial conditions to apply
 end
 
+function validate_initial_conditions(params)
+    are_sets_equal(params.species, SPECIES_VECTOR) || throw(ArgumentError("The species vector must contain all the elements of the reference species vector in config.jl and have the same length (i.e. contain each species only once). Check your provided vector in the input file."))
+    size(params.species) == size(params.values) || throw(ArgumentError("The species and values vector must have the same size."))
+end
+
 function apply_initial_conditions_for_intial_timestep!(sys, parameters)
     initial_condition_parameters = parameters.initial_conditions
     # we only want the boundary conditions for the PHI_EQ

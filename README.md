@@ -13,25 +13,6 @@ This repository contains the source code for the research project **"[Your Resea
 
 ---
 
-## **\ud83d\udcc2 Repository Structure**
-```
-├── src/                 # Main source code
-│   ├── main.py          # Entry point script
-│   ├── utils.py         # Utility functions
-│   ├── analysis.py      # Data analysis
-├── notebooks/           # Jupyter notebooks for analysis
-├── data/                # Sample datasets (not included in repo)
-├── results/             # Output results
-├── requirements.txt     # Python dependencies
-├── environment.yml      # Conda environment file (if applicable)
-├── pyenv_setup.sh       # Pyenv setup script
-├── Dockerfile           # Docker container setup (if applicable)
-├── README.md            # This file
-└── LICENSE              # License file
-```
-
----
-
 ## **Installation**
 ### **Prerequisites**
 Before running the code, ensure you have the following installed:

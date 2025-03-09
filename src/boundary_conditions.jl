@@ -11,6 +11,21 @@
     boundary_values::Vector{Vector{Float64}} = Vector{Vector{Float64}}() # values to apply at these boundaries
 end
 
+function validate_dirichlet_boundary_conditions(params)
+    for species in params.species
+        if species < 1
+            throw(ArgumentError("The species $species is not a valid species. Indicies must be positive and taken from the SPECIES_VECTOR in config.jl"))
+        end
+        # it must be in the list of default species
+        if species ∉ SPECIES_VECTOR
+            throw(ArgumentError("The species $species cannot be found in the SPECIES_VECTOR of config.jl."))
+        end
+    end
+    # TODO : add validation for the boundary indices that they are valid
+    # simply check that boundary_values have same shape as boundary_indices
+    size(params.boundary_indices) == size(params.boundary_values) || throw(AssertionError("The size of the indices and values vectors have to be the same."))
+end
+
 function apply_dirichlet_for_initial_timestep!(sys, parameters)
     dirichlet_parameters = parameters.boundary_conditions.dirichlet
     # we only want the boundary conditions for the PHI_EQ

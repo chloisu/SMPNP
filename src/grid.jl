@@ -17,13 +17,17 @@ equally spaced grid in one direction
 
 @option struct EquallySpaced1dParams
     pore_radius::Float64 = 10e-9 # pore radius in [meter]
-    pore_length::Float64 = 50e-9 # pore length in [meter]
+end
+
+function validate_equally_spaced_1d_parameters(parameters)
+    params = parameters.grid.equally_spaced_1d
+    params.pore_radius > 0.0 || throw(AssertionError("The pore radius must be larger than 0."))
+
 end
 
 function get_equally_spaced_1d(parameters)
     # first, we normalize the geometry inputs
-    r = parameters.grid.equally_spaced_1d.pore_radius / parameters.grid.equally_spaced_1d.pore_length
-    X = collect(0:0.001:r)
+    r = parameters.grid.equally_spaced_1d.pore_radius / parameters.non_dim.L_REF
     return simplexgrid(X)
 end
 
@@ -33,10 +37,17 @@ end
 two-dimensional grid of a slit connected to two reservoirs with a symmetry 
 in the middle of the slit. The mesh is refined towards the slit wall in the
 """
-@option struct NanoSlitWithResevoirs2DParams
+@option mutable struct NanoSlitWithResevoirs2DParams
     pore_radius::Float64 = 10e-9 # pore radius in [meter]
     pore_length::Float64 = 50e-9 # pore length in [meter]
     reservoir_height::Float64 = 80e-9 # reservoir height [meter]
+end
+
+function validate_nano_slit_with_reservoirs_2d(parameters)
+    params = parameters.grid.nano_slit_with_reservoirs_2d
+    params.pore_radius > 0.0 || throw(AssertionError("The pore radius must be larger than 0."))
+    params.pore_length > 0.0 || throw(AssertionError("The pore length must be larger than 0."))
+    params.reservoir_height > 0.0 || throw(AssertionError("The reservoir height must be larger than 0."))
 end
 
 function get_nano_slit_with_reservoirs_2d(parameters)
@@ -107,6 +118,20 @@ grids_dict = Dict(
     "nano_slit_with_reservoirs_2d" => get_nano_slit_with_reservoirs_2d,
 )
 
+# Dictionary mapping keys to function calls
+validation_dict = Dict(
+    "equally_spaced_1d" => validate_equally_spaced_1d_parameters,
+    "nano_slit_with_reservoirs_2d" => validate_nano_slit_with_reservoirs_2d,
+)
+
+"""
+asdf
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function validate_grid_type(mode::String)
+    # Check if the mode is a key in the dictionary
+    mode in keys(grids_dict) || throw(NotImplementedError("Not Implemented Grid type: $mode. The grid_type specified in the parameter file is not yet implemented. Currently available values are: " * string(collect(keys(grids_dict)))))
+end
 
 """
 Generic function that calls the correct function from the dictionary
@@ -117,6 +142,18 @@ function get_grid(grid_type::String, args...)
         return grids_dict[grid_type](args...)
     else
         error("Function '$grid_type' not found in dictionary")
+    end
+end
+
+"""
+Generic function that calls the correct function from the dictionary
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function validate_grid_parameters(grid_type::String, args...)
+    if haskey(grids_dict, grid_type)
+        validation_dict[grid_type](args...)
+    else
+        error("Validation Function for grid type '$grid_type' not found in validation dictionary.")
     end
 end
 
