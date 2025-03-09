@@ -74,7 +74,24 @@ $$
     \lambda_D \nabla^2 \phi = -\frac{1}{\varepsilon}(c_+-c_-)
 $$
 
-## **\u25b6\ufe0f Usage**
+## Code Verificaiton
+To verify the implementation, we compare the numerically computed solutions for two cases against analytical and semi-analytical expressions.
+
+### Analytical PB distribution
+For the classical Poisson-Nernst-Planck equations where the ion sizes are not taken into account, there is an analytical solution for the double layer profile. We setup a one-dimensional problem from $x = 0$ to $x = L$ with the following boundary conditions
+
+$$\phi = \tilde{\phi}_{\text{wall}}, J_+ = J_-= 0\qquad \text{at } x = 0$$
+$$\phi = 0, c_+ = c_-= 1\qquad \text{at } x = 1$$
+
+The analytical solution is then given by
+$$ \phi(x) = 2\log\left(\frac{a+b\exp{\left(-x/\lambda_D\right)}}{a-b\exp{\left(-x/\lambda_D\right)}}\right), \qquad a = \exp{\left(\frac{\phi_{\text{wall}}}{2}\right)}+ 1,\quad b = \exp{\left(\frac{\phi_{\text{wall}}}{2}\right)}- 1 $$
+
+$$c_\pm(x) = \exp\left(\mp \phi(x)\right)$$
+
+## Concentration distribution in a size-modified case
+
+
+## **Usage**
 ### **Running the main script**
 ```sh
 julia --project=. ./src/smpnp.jl input.yml
@@ -90,7 +107,7 @@ python src/main.py --input data/example.csv --output results/processed.csv
 
 ---
 
-## **\ud83d\udcca Results & Output**
+## **Results & Output**
 This code generates:
 - **Processed data:** Stored in `results/`
 - **Figures & plots:** Saved as `.png` files
@@ -98,7 +115,7 @@ This code generates:
 
 ---
 
-## **\ud83d\udcdd Citation**
+## **Citation**
 If you use this code in your research, please cite:
 
 ```bibtex
