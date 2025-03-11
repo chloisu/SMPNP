@@ -16,11 +16,12 @@ This repository contains the source code for the research project **"[Your Resea
 ## **Installation**
 ### **Prerequisites**
 Before running the code, ensure you have the following installed:
-- **Python \u2265 3.10** (recommended: `pyenv` or `conda`)
+- **Julia**
+- **Python 3.10.16** (recommended: `pyenv` or `conda`)
 - **Git** for cloning the repository
 - **Required libraries** (see `requirements.txt`)
 
-### **2\ufe0f\u20e3 Setup Instructions**
+### **Setup Instructions**
 #### **Using `pip`**
 ```sh
 git clone [repo-url]
@@ -49,7 +50,6 @@ For reproducibility, you can use the provided Docker container:
 docker build -t my_project .
 docker run --rm -it my_project
 ```
-
 ---
 
 
