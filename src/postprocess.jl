@@ -12,3 +12,30 @@
 # step has produced outpufiles of the patter *.out where * is the time in non-dimensional diffusion
 # times.
 
+
+@option struct ExtractSlice
+    case::String = ""# name of the line
+    slice::Any = "" #specify the slice (required)
+end
+
+@option struct Integration
+    case::String = ""# name of the integration
+    boundary_id::Int = 0    # boundary_id for which we want to know the flux.
+end
+
+@option struct QuantityOverTime
+    case::String
+
+end
+
+"""
+this is the main function to postprocess the solution. It get's invoked if the parameter
+file provided is a postprocessing parameter file or if the command line argument -postprocess
+is provided.
+"""
+function smpnp_postprocess()
+    # we do some checks on the solution 
+    # we do all the extract lines parts
+    # we do all the integration parts
+    # we do all the quantitiy over time parts
+end

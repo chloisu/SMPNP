@@ -36,8 +36,14 @@
     solver_parameters::SolverParameters = SolverParameters()
     time_parameters::TimeParameters = TimeParameters()
 end
-
-
+"""
+@option struct PostProcessingParameters
+    case::String = "" # name of the case
+    input_dir::String = "" # directory where the timestep output files are located
+    extractSlices::Vector{ExtractSlice}
+    integrations::Vector{Integration}
+end
+"""
 
 """
     load_config_file(filename)
