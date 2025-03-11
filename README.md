@@ -83,13 +83,38 @@ For the classical Poisson-Nernst-Planck equations where the ion sizes are not ta
 $$\phi = \tilde{\phi}_{\text{wall}}, J_+ = J_-= 0\qquad \text{at } x = 0$$
 $$\phi = 0, c_+ = c_-= 1\qquad \text{at } x = 1$$
 
-The analytical solution is then given by
+All other parameter can be found in the [input file](./test/verification_simple_pnp.yml) for that test case .
+
+The analytical solution is given by
 $$ \phi(x) = 2\log\left(\frac{a+b\exp{\left(-x/\lambda_D\right)}}{a-b\exp{\left(-x/\lambda_D\right)}}\right), \qquad a = \exp{\left(\frac{\phi_{\text{wall}}}{2}\right)}+ 1,\quad b = \exp{\left(\frac{\phi_{\text{wall}}}{2}\right)}- 1 $$
 
 $$c_\pm(x) = \exp\left(\mp \phi(x)\right)$$
 
-## Concentration distribution in a size-modified case
 
+
+## Concentration distribution in a size-modified case (dirichlet)
+For the case with finite ion sizes, we setup a first test case that still uses the dirichlet boundary conditions for potential and concentration at $x = 1$. The chosen boundary conditions for this case are given as 
+
+$$\phi = \tilde{\phi}_{\text{wall}}, J_+ = J_-= 0\qquad \text{at } x = 0$$
+$$\phi = 0, c_+ = c_-= 1\qquad \text{at } x = 1$$
+
+which are the same boundary conditions as for the simple PNP case above. The difference here is that we now solve the size-modified PNP equations that take the finite ion sizes into account. These ion sizes are given as
+
+$$a_+ = a_- = a_0 = 5Angstrom$$
+
+All other parameter can be found in the [input file](./test/verification_finite_size_pnp_dirichlet.yml) for that test case.
+
+For this problem, we have a semi-analytical solution. Given the numerical solution for the potential $\phi(x)$ as well as the two dirichlet values for the concentrations at $x = L$, the solutions for the concentrations $c_+(x)$ and $c_-(x)$ are given as follows
+$$ c_-(x) = \frac{1}{m_-}\left(\frac{A_- - \frac{A_-A_+}{1+A_+}}{1+A_- - \frac{A_-A_+}{1+A_+}}\right)$$
+
+$$ c_+(x) = \frac{1}{m_+}\left(\frac{A_+ - \frac{A_-A_+}{1+A_-}}{1+A_+ - \frac{A_-A_+}{1+A_-}}\right)$$
+
+$$A_\pm = \exp\left(\left[\Phi_\pm \mp \phi(x)\right]\frac{m_\pm}{m_0}\right)$$
+$$\Phi_\pm = \frac{m_\pm}{m_0}\log\left(\frac{\zeta_\pm^L}{1-\sum_{i=(+,-)} \zeta_i^L}\right) \pm \phi^L$$
+$$\zeta_\pm^L = c_\pm^L m_\pm \qquad c_\pm^L = c_\pm(x = L)$$
+$$\phi^L = \phi(x = L)$$
+
+## Concentration distribution in a size-modified case (channel)
 
 ## **Usage**
 ### **Running the main script**

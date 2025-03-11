@@ -25,4 +25,4 @@ scalarplot!(p[2, 1], grid, ca_numerical, clear=false, show=true, linestyle=:dash
 scalarplot!(p[3, 1], grid, cc_analytical, clear=false, show=true)
 scalarplot!(p[3, 1], grid, cc_numerical, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
 
-GLMakie.save(joinpath(".", "db.jpg"), reveal(p))  #hide
+GLMakie.save(joinpath(".", "verification_simple_pnp.jpg"), reveal(p))  #hide
