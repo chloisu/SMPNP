@@ -28,6 +28,7 @@ end
 function get_equally_spaced_1d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.grid.equally_spaced_1d.pore_radius / parameters.non_dim.L_REF
+    X = collect(0:0.001:r)
     return simplexgrid(X)
 end
 

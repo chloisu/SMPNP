@@ -10,20 +10,20 @@
     # PNP : the classical Poisson-Nernst-Planck system without taking the size of the ions into account.
     # MPNP: the size of the ions is taken into account but with a single constant size parameters (i.e. both ions are assumed to have the same size.)
     # SMPNP: each of the two ions has a differnt size
-    PNP_mode::String = "SMPNP"
+    pnp_type::String = "SMPNP"
     species_parameters::SpeciesParameters = SpeciesParameters()
     grid_type::String = "equally_spaced_1d"
     grid::GridParameters = GridParameters()
-    pore_radius::Float64 = 10e-9 # pore radius [meter]
-    pore_length::Float64 = 50e-9 # pore length [meter]
-    reservoir_height::Float64 = 80e-9
-    D_REF::Float64 = 5e-9
-    cation_size::Float64 = 5e-10 # cation size [meter]
-    anion_size::Float64 = 5e-10 # cation size [meter]
-    solvent_molecule_size::Float64 = 5e-10
-    D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
-    D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
-    surface_potential::Float64 = 0.3# surface potential [V]
+    #pore_radius::Float64 = 10e-9 # pore radius [meter]
+    #pore_length::Float64 = 50e-9 # pore length [meter]
+    #reservoir_height::Float64 = 80e-9
+    #D_REF::Float64 = 5e-9
+    #cation_size::Float64 = 5e-10 # cation size [meter]
+    #anion_size::Float64 = 5e-10 # cation size [meter]
+    ##solvent_molecule_size::Float64 = 5e-10
+    #D_anion::Float64 = 5e-9 # anion diffusivity [m^2/s]
+    #D_cation::Float64 = 5e-9 # cation diffusivity [m^2/s]
+    #surface_potential::Float64 = 0.3# surface potential [V]
     output_directory::String = ""
     # the following section describes the references scales
     # used for the non-dimensionalization of the equations
@@ -61,8 +61,8 @@ This function verifies the provided input parameters. It makes sure that the inp
 """
 function check_parameters(parameters)
     # Validate the fields after parsing
-    validate_PNP_mode(parameters.PNP_mode)
-    validate_species_parameters(parameters.species_parameters)
+    validate_pnp_type(parameters.pnp_type)
+    validate_species_parameters(parameters.species_parameters, parameters.pnp_type)
     validate_grid_type(parameters.grid_type)
     validate_grid_parameters(parameters.grid_type, parameters)
     validate_non_dim(parameters.non_dim)

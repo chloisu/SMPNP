@@ -156,7 +156,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
     end
 end
 
-function main()
+function smpnp()
     # the very first thing we do is parse the command line arguments
     args = parse_args()
     # load the parameter file 
@@ -185,12 +185,14 @@ function main()
     # write the initial potential distribution as VTK
     @assert PHI_EQ == 1 # make sure that the potential species is the first species
     initial_potential = U[1, :]
-    writeVTK("out", grid, phi=U[1, :])
+    # solve initial timestep
+    nf = nodeflux(sys, U)
+    filename = @sprintf("%.5f.vtu", 0.0)
+    writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
     # check if there are any nan values in the initial solution
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
     end
-
     # setup the time parameters correclty
     setup_time_parameters!(parameters) # non dimensionalize some of the input parameters
     time = 0.0
@@ -234,8 +236,12 @@ function main()
 
     end
     # and we are done
-    return 0
+    return grid, U
 
 end
 
-main()#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))
+# Only call main() if the script is executed directly
+if abspath(PROGRAM_FILE) == @__FILE__
+    smpnp()
+end
+#method_linear=KrylovJL_GMRES(precs=BlockPreconBuilder(precs=LinearSolvePreconBuilder(UMFPACKFactorization())))

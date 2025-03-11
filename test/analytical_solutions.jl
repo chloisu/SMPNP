@@ -1,6 +1,6 @@
 using ExtendableGrids
 using GridVisualize
-include("constants.jl")
+include("../src/constants.jl")
 
 
 function grid1d(; n=50)
@@ -23,11 +23,21 @@ function concentrations_pb_1d(grid, wall_potential, r)
     return ca, cc
 end
 
-#function plotting_func1d(; Plotter=default_plotter(), kwargs...)
-#    g, f = potential_pb_1d(0.4, 5e-9)
-#    return scalarplot(g, f; Plotter=Plotter, resolution=(500, 300), kwargs...)
-#end
+function concentrations_smpnp_1d(potential_array, aa, ac, a0, ca_centerline, cc_centerline)
+    ma = aa^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
+    mc = ac^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
+    m0 = a0^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
 
-#using GLMakie
-#p = plotting_func1d(Plotter=GLMakie, verbose=true)
-#GLMakie.save(joinpath(".", "db.jpg"), p)  #hide
+    xa_centerline = ca_centerline * ma
+    xc_centerline = cc_centerline * mc
+
+    Ca = ma / m0 * log(xa_centerline / (1 - xa_centerline - xc_centerline)) + Z_ANION * potential_array[end]
+    Cc = mc / m0 * log(xc_centerline / (1 - xa_centerline - xc_centerline)) + Z_CATION * potential_array[end]
+
+    Aa = exp.((Ca .+ potential_array) * ma / m0)
+    Ac = exp.((Cc .- potential_array) * mc / m0)
+
+    ca = 1.0 ./ ma .* (Aa - Aa .* Ac ./ (1 .+ Ac)) ./ (1 .+ Aa .- Aa .* Ac ./ (1 .+ Ac))
+    cc = 1.0 ./ mc .* (Ac - Aa .* Ac ./ (1 .+ Aa)) ./ (1 .+ Ac .- Aa .* Ac ./ (1 .+ Aa))
+    return ca, cc
+end
