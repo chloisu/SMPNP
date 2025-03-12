@@ -20,6 +20,7 @@ using Configurations
 using Metal
 using ArgParse
 using GLMakie
+using JLD2
 
 include("constants.jl")
 include("config.jl")
@@ -167,7 +168,9 @@ function smpnp()
     save_parameters_to_yaml(parameters, output_dir)
     # generate grid
     grid = get_grid(parameters.grid_type, parameters)#generate_grid_2d(parameters)#
-    # output the grid as an image
+    # save the grid for postprocessing
+    filename = joinpath(output_dir, "grid.jld2")
+    @save filename grid
     # TODO: make the grid output nicer
     vis = GridVisualizer(Plotter=GLMakie)
     gridplot!(vis, grid; size=(3000, 1000))
@@ -187,8 +190,9 @@ function smpnp()
     initial_potential = U[1, :]
     # solve initial timestep
     nf = nodeflux(sys, U)
-    filename = @sprintf("%.5f.vtu", 0.0)
-    writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
+    filename = joinpath(output_dir, @sprintf("%.5f.jld2", 0.0))
+    @save filename U
+    #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
     # check if there are any nan values in the initial solution
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
@@ -207,6 +211,10 @@ function smpnp()
     # setup helper solution vector
     U_previous_timestep = similar(U)
     U_previous_timestep .= U
+    # solve the system for postprocessing
+    filename = joinpath(output_dir, "system.jld2")
+    system_state = VoronoiFVM.SystemState(sys2)
+    @save filename system_state
     # time loop
     while time < 100#check_if_stay_in_time_loop(time, U, U_previous_timestep, parameters)
         try
@@ -226,11 +234,17 @@ function smpnp()
         end
         if time ≈ t_plot
             nf = nodeflux(sys2, U)
-            filename = @sprintf("%.5f.vtu", time)
-            writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+            filename = joinpath(output_dir, @sprintf("%.5f.jld2", time))
+            #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+            @save filename U
             # next plot in
             t_plot = t_plot + parameters.time_parameters.plot_time_interval
         end
+        tf = TestFunctionFactory(sys2)
+        T = testfunction(tf, [1], [3])
+        I = integrate(sys2, T, U)
+        println("Current Flux")
+        println(I)
         # decide on new timestep
         Δt = min(min(Δt, parameters.time_parameters.max_timestep), t_plot - time)
 

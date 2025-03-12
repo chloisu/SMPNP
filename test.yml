@@ -9,6 +9,7 @@ grid:
 
 species_parameters:
   species : [2,3]
+  solvent_size : 5e-10
   ion_sizes : [5e-10,5e-10]
   diffusivities : [5e-9,5e-9]
 
