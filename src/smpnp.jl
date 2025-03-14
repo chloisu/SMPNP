@@ -132,15 +132,18 @@ end
 this is a small custom function to check if we are done with the time loop of the simulation.
 That depends on whether or not we solve for a specific final time or for the steady state.
 """
-function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters)
+function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters, in_time_loop)
     # check if we have even started
-    if current_time < parameters.time_parameters.initial_timestep
+    if !in_time_loop
         return true
     end
     # else we check the conditions
     if parameters.time_parameters.solve_to_steady_state
         # check if we have reached the steady state
-        if norm(U_current_timestep - U_previous_timestep, Inf) > parameters.time_parameters.steady_state_tol
+        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / (maximum(abs.(U_previous_timestep)) + eps())
+        print("Current tolerance")
+        println(current_tol)
+        if current_tol > parameters.time_parameters.steady_state_tol
             return true
         else
             # we are done
@@ -169,8 +172,9 @@ function smpnp()
     # generate grid
     grid = get_grid(parameters.grid_type, parameters)#generate_grid_2d(parameters)#
     # save the grid for postprocessing
-    filename = joinpath(output_dir, "grid.jld2")
-    @save filename grid
+    filename = joinpath(output_dir, "grid")
+    writeVTK(filename * ".vtu", grid)
+    @save filename * ".jld2" grid
     # TODO: make the grid output nicer
     vis = GridVisualizer(Plotter=GLMakie)
     gridplot!(vis, grid; size=(3000, 1000))
@@ -190,8 +194,9 @@ function smpnp()
     initial_potential = U[1, :]
     # solve initial timestep
     nf = nodeflux(sys, U)
-    filename = joinpath(output_dir, @sprintf("%.5f.jld2", 0.0))
-    @save filename U
+    filename = joinpath(output_dir, @sprintf("%.*f", TIME_WRITE_PRECISION, 0.0))
+    writeVTK(filename * ".vtu", grid, phi=U[1, :], gradphi=nf[:, 1, :])
+    @save filename * ".jld2" U
     #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
     # check if there are any nan values in the initial solution
     if any(isnan.(U))
@@ -211,17 +216,22 @@ function smpnp()
     # setup helper solution vector
     U_previous_timestep = similar(U)
     U_previous_timestep .= U
+    U_old = deepcopy(U)
     # solve the system for postprocessing
     filename = joinpath(output_dir, "system.jld2")
     system_state = VoronoiFVM.SystemState(sys2)
     @save filename system_state
     # time loop
-    while time < 100#check_if_stay_in_time_loop(time, U, U_previous_timestep, parameters)
+    in_time_loop = false
+    # time loop via simple call to solve
+    while time < check_if_stay_in_time_loop(time, U, U_old, parameters, in_time_loop)
+        in_time_loop = true
         try
             print("Solving timestep at time: ")
             println(time)
             U = solve(sys2; inival=U_previous_timestep, control=control, tstep=Δt)
             time = time + Δt
+            U_old .= U_previous_timestep
             U_previous_timestep .= U
             Δt *= 2
         catch error
@@ -231,12 +241,14 @@ function smpnp()
             println(time)
             print("with timestep: ")
             println(Δt)
+            in_time_loop = false
+            continue
         end
         if time ≈ t_plot
             nf = nodeflux(sys2, U)
-            filename = joinpath(output_dir, @sprintf("%.5f.jld2", time))
-            #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
-            @save filename U
+            filename = joinpath(output_dir, @sprintf("%.*f", TIME_WRITE_PRECISION, time))
+            writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+            @save filename * ".jld2" U
             # next plot in
             t_plot = t_plot + parameters.time_parameters.plot_time_interval
         end

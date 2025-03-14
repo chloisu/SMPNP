@@ -17,12 +17,12 @@ using GridVisualize
 using GLMakie
 using VoronoiFVM
 include("smpnp.jl")
-"""
-@option struct ExtractSlice
-    case::String = ""# name of the line
-    slice::Any = "" #specify the slice (required)
-end
 
+@option struct ExtractSlice
+    slice::Any = "" #specify the slice (required)
+
+end
+"""
 @option struct Integration
     case::String = ""# name of the integration
     boundary_id::Int = 0    # boundary_id for which we want to know the flux.
@@ -35,14 +35,30 @@ end
 """
 
 """
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function check_solution(folder_name)
+    # given the folder name let's check that it's a proper case
+    isfile(joinpath(folder_name, "grid.jld2")) || throw(ArgumentError("A valid case must have a grid.jld2 file. Post processing stopped."))
+    # List all files and check for .yml files
+    yml_files = filter(file -> endswith(file, ".yml"), readdir(folder_name))
+    !isempty(yml_files) || throw(ArgumentError("A valid case must have a parameter .yml file. Post processing stopped."))
+    isfile(joinpath(folder_name, @sprintf("%.*f.jld2", TIME_WRITE_PRECISION, 0.0))) || throw(ArgumentError("A valid case must have a an initial timestep file. Post processing stopped."))
+
+
+end
+
+"""
 this is the main function to postprocess the solution. It get's invoked if the parameter
 file provided is a postprocessing parameter file or if the command line argument -postprocess
 is provided.
 """
 function smpnp_postprocess()
     # we do some checks on the solution 
+    check_solution("./output_001/")
     # we do all the extract lines parts
     # Deserialize the object from the file using JLD2
+
     grid = JLD2.load("./output_001/grid.jld2")["grid"]
     sol = JLD2.load("./output_001/0.02000.jld2")["U"]
     vis = GridVisualizer(Plotter=GLMakie)
