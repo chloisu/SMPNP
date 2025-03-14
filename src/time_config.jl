@@ -5,7 +5,7 @@ parameter file.
 """
 @option mutable struct TimeParameters
     solve_to_steady_state::Bool = true
-    steady_state_tol::Float64 = 1e-14
+    steady_state_tol::Float64 = 1e-12
     final_time::Float64 = 1000 # measured in [s]
     max_timestep::Float64 = (50e-9)^2 / 5e-9 #  measure in [s]
     initial_timestep::Float64 = 1e-12 # measured in [s]

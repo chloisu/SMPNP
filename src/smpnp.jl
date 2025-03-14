@@ -74,6 +74,7 @@ That depends on whether or not we solve for a specific final time or for the ste
 function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters, in_time_loop)
     # check if we have even started
     if !in_time_loop
+        print("Exit from (1)")
         return true
     end
     # else we check the conditions
@@ -82,10 +83,13 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
         current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / (maximum(abs.(U_previous_timestep)) + eps())
         print("Current tolerance")
         println(current_tol)
+        print("Tolerance")
+        println(parameters.time_parameters.steady_state_tol)
         if current_tol > parameters.time_parameters.steady_state_tol
             return true
         else
             # we are done
+            print("Exit from (2)")
             return false
         end
     else
@@ -94,6 +98,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
             return true
         else
             # we are done
+            print("Exit from (3)")
             return false
         end
     end
@@ -163,7 +168,7 @@ function smpnp()
     # time loop
     in_time_loop = false
     # time loop via simple call to solve
-    while time < check_if_stay_in_time_loop(time, U, U_old, parameters, in_time_loop)
+    while check_if_stay_in_time_loop(time, U, U_old, parameters, in_time_loop)
         in_time_loop = true
         try
             print("Solving timestep at time: ")
@@ -191,18 +196,11 @@ function smpnp()
             # next plot in
             t_plot = t_plot + parameters.time_parameters.plot_time_interval
         end
-        tf = TestFunctionFactory(sys2)
-        T = testfunction(tf, [1], [3])
-        I = integrate(sys2, T, U)
-        println("Current Flux")
-        println(I)
         # decide on new timestep
         Δt = min(min(Δt, parameters.time_parameters.max_timestep), t_plot - time)
-
     end
     # and we are done
     return grid, U
-
 end
 
 # Only call main() if the script is executed directly

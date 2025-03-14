@@ -19,6 +19,3 @@ boundary_conditions:
     species : [1,2,3]
     boundary_indices : [[1,2],[2],[2]]
     boundary_values : [[0.3,0.0],[1.0],[1.0]]
-
-time_parameters:
-  final_time : 1e-6

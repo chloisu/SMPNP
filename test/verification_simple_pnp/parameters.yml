@@ -4,6 +4,7 @@ species_parameters:
   species:
     - 2
     - 3
+  solvent_size: 0.0
   ion_sizes:
     - 0.0
     - 0.0
@@ -18,16 +19,6 @@ grid:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
     reservoir_height: 8.0e-8
-pore_radius: 1.0e-8
-pore_length: 5.0e-8
-reservoir_height: 8.0e-8
-D_REF: 5.0e-9
-cation_size: 5.0e-10
-anion_size: 5.0e-10
-solvent_molecule_size: 5.0e-10
-D_anion: 5.0e-9
-D_cation: 5.0e-9
-surface_potential: 0.3
 output_directory: "verification_simple_pnp"
 non_dim:
   L_REF: 1.0e-8
@@ -75,8 +66,8 @@ solver_parameters:
   method_linear: ~
 time_parameters:
   solve_to_steady_state: true
-  steady_state_tol: 1.0e-14
-  final_time: 1.0e-6
+  steady_state_tol: 1.0e-12
+  final_time: 1000.0
   max_timestep: 4.999999999999999e-7
   initial_timestep: 1.0e-12
   plot_time_interval: 1.0e-8
