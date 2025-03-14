@@ -138,7 +138,7 @@ function smpnp()
     initial_potential = U[1, :]
     # solve initial timestep
     nf = nodeflux(sys, U)
-    filename = joinpath(output_dir, @sprintf("%.*f", TIME_WRITE_PRECISION, 0.0))
+    filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, 0.0))
     writeVTK(filename * ".vtu", grid, phi=U[1, :], gradphi=nf[:, 1, :])
     @save filename * ".jld2" U
     #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
@@ -190,7 +190,7 @@ function smpnp()
         end
         if time ≈ t_plot
             nf = nodeflux(sys2, U)
-            filename = joinpath(output_dir, @sprintf("%.*f", TIME_WRITE_PRECISION, time))
+            filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, time))
             writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
             @save filename * ".jld2" U
             # next plot in
@@ -200,6 +200,7 @@ function smpnp()
         Δt = min(min(Δt, parameters.time_parameters.max_timestep), t_plot - time)
     end
     # and we are done
+    generate_pvd(output_dir, "out.pvd")
     return grid, U
 end
 

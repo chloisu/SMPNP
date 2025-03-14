@@ -93,3 +93,39 @@ This function was generated with the help of ChatGPT (OpenAI).
 function are_sets_equal(v1, v2)
     return length(v1) == length(v2) && Set(v1) == Set(v2)
 end
+
+using Glob
+using Printf
+""" 
+This function was generated with the help of ChatGPT (OpenAI).
+"""
+function generate_pvd(directory::String, output_file::String="time_series.pvd")
+    # Find all .vtu files in the directory
+    vtu_files = glob("*.vtu", directory)
+    println("Found files: ", vtu_files)
+    # Filter files with only numeric names
+    numeric_vtu_files = filter(file -> occursin(r"^\d+\.\d+\.vtu$", basename(file)), vtu_files)
+    println("Filtered numeric files: ", numeric_vtu_files)
+    # Sort the files by the numeric value of the filename
+    sorted_files = sort(numeric_vtu_files, by=file -> parse(Float64, splitext(basename(file))[1]))
+
+    # Open the PVD file for writing
+    open(joinpath(directory, output_file), "w") do io
+        println(io, "<VTKFile type=\"Collection\" version=\"1.0\" byte_order=\"LittleEndian\">")
+        println(io, "  <Collection>")
+
+        # Write each dataset entry
+        for file in sorted_files
+            time_value = parse(Float64, splitext(basename(file))[1])
+            println(io, @sprintf("    <DataSet timestep=\"%.6f\" file=\"%s\"/>", time_value, basename(file)))
+        end
+
+        println(io, "  </Collection>")
+        println(io, "</VTKFile>")
+    end
+
+    println("PVD file generated successfully: ", joinpath(directory, output_file))
+end
+
+# Example usage
+# generate_pvd("path/to/your/directory")

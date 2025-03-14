@@ -5,7 +5,10 @@ grid:
   nano_slit_with_reservoirs_2d:
     pore_radius : 10e-9
     pore_length : 50e-9
-    reservoir_height: 80e-9
+    reservoir_height: 20e-9
+
+non_dim:
+    L_REF : 10e-9
 
 species_parameters:
   species : [2,3]
