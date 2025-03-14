@@ -154,6 +154,10 @@ function smpnp()
 
     # setup the time-dependent system
     sys2 = get_time_dependent_system(grid, parameters)
+    # we also setup the other systems to look at the different fluxes individually
+    sys_diff = get_diffusion_flux_system(grid, parameters)
+    sys_pot = get_potential_flux_system(grid, parameters)
+    sys_size = get_size_flux_system(grid, parameters)
     # apply boundary and initial conditions
     apply_dirichlet_for_time_dependent!(sys2, parameters)
     U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)
@@ -190,8 +194,11 @@ function smpnp()
         end
         if time ≈ t_plot
             nf = nodeflux(sys2, U)
+            nf_diff = nodeflux(sys_diff, U)
+            nf_pot = nodeflux(sys_pot, U)
+            nf_size = nodeflux(sys_size, U)
             filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, time))
-            writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :])
+            writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :], nf_diff_minus=nf_diff[:, 2, :], nf_diff_plus=nf_diff[:, 3, :], nf_pot_minus=nf_pot[:, 2, :], nf_pot_plus=nf_pot[:, 3, :], nf_size_minus=nf_size[:, 2, :], nf_size_plus=nf_size[:, 3, :])
             @save filename * ".jld2" U
             # next plot in
             t_plot = t_plot + parameters.time_parameters.plot_time_interval
