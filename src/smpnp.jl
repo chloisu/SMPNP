@@ -36,67 +36,6 @@ include("parameters.jl")
 include("chemical_potential.jl")
 include("physics.jl")
 
-function initial_timestep_initial_and_boundary_conditions_2d!(sys, parameters)
-    # we add the boundary conditions
-    # we scale the surface potential to the correct value
-    surface_potential_norm = 11.8#parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
-    #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
-    # we set the inital potential distribution to zero
-    inival = unknowns(sys)
-    inival .= 0
-end
-
-function initial_timestep_initial_and_boundary_conditions_1d!(sys, parameters)
-    # we add the boundary conditions
-    # we scale the surface potential to the correct value
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
-    boundary_dirichlet!(sys, 1, 2, 0)
-    # we set the inital potential distribution to zero
-    inival = unknowns(sys)
-    inival .= 0
-end
-
-function time_dependent_initial_and_boundary_conditions_2d!(sys, initial_potential, parameters)
-    # potential boundary conditions
-    surface_potential_norm = 11.8#parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, 0) # left reservoir 
-    #boundary_dirichlet!(sys, 1, 4, 0) # right reservoir
-    boundary_dirichlet!(sys, 1, 3, surface_potential_norm) # wall
-    # anion boundary conditions
-    boundary_dirichlet!(sys, 2, 1, 1.0) #left reservoir
-    #boundary_dirichlet!(sys, 2, 4, 1.1) # right reservoir
-    # cation bounda ry conditions
-    boundary_dirichlet!(sys, 3, 1, 1.0)#left reservoir
-    boundary_dirichlet!(sys, 3, 4, 1.1)# right reservoir
-
-    #boundary_neumann!(sys, 3, 2, 0.0)
-    U = unknowns(sys)
-    U[1, :] = initial_potential
-    U[2, :] .= 1.0
-    U[3, :] .= 1.0
-
-end
-function time_dependent_initial_and_boundary_conditions_1d!(sys, initial_potential, parameters)
-    # potential boundary conditions
-    surface_potential_norm = parameters.surface_potential * E_CHARGE * BETA
-    boundary_dirichlet!(sys, 1, 1, surface_potential_norm)
-    boundary_dirichlet!(sys, 1, 2, 0)
-    # anion boundary conditions
-    boundary_dirichlet!(sys, 2, 2, 1.0)
-    #boundary_neumann!(sys, 2, 2, 0.0)
-    # cation bounda ry conditions
-    boundary_dirichlet!(sys, 3, 2, 1.0)
-    #boundary_neumann!(sys, 3, 2, 0.0)
-    U = unknowns(sys)
-    U[1, :] = initial_potential
-    U[2, :] .= 1.0
-    U[3, :] .= 1.0
-end
-
-
 """
 function to parse the command line arguments of the code.
 This function was generated with the help of ChatGPT (OpenAI).
