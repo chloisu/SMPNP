@@ -11,3 +11,4 @@ test*.jl
 scratch.jl
 output**/**
 **/output**/**
+figure/

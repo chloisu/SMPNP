@@ -137,9 +137,9 @@ function smpnp()
     @assert PHI_EQ == 1 # make sure that the potential species is the first species
     initial_potential = U[1, :]
     # solve initial timestep
-    nf = nodeflux(sys, U)
+    #nf = nodeflux(sys, U)
     filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, 0.0))
-    writeVTK(filename * ".vtu", grid, phi=U[1, :], gradphi=nf[:, 1, :])
+    writeVTK(filename * ".vtu", grid, phi=U[1, :])
     @save filename * ".jld2" U
     #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
     # check if there are any nan values in the initial solution
@@ -193,12 +193,12 @@ function smpnp()
             continue
         end
         if time ≈ t_plot
-            nf = nodeflux(sys2, U)
-            nf_diff = nodeflux(sys_diff, U)
-            nf_pot = nodeflux(sys_pot, U)
-            nf_size = nodeflux(sys_size, U)
+            #nf = nodeflux(sys2, U)
+            #nf_diff = nodeflux(sys_diff, U)
+            #nf_pot = nodeflux(sys_pot, U)
+            #nf_size = nodeflux(sys_size, U)
             filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, time))
-            writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :], nminus=nf[:, 2, :], nplus=nf[:, 3, :], nf_diff_minus=nf_diff[:, 2, :], nf_diff_plus=nf_diff[:, 3, :], nf_pot_minus=nf_pot[:, 2, :], nf_pot_plus=nf_pot[:, 3, :], nf_size_minus=nf_size[:, 2, :], nf_size_plus=nf_size[:, 3, :])
+            writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :])
             @save filename * ".jld2" U
             # next plot in
             t_plot = t_plot + parameters.time_parameters.plot_time_interval

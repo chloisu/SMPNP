@@ -1,25 +1,25 @@
 case: "test_case"
-grid_type: "nano_slit_with_reservoirs_2d"
+grid_type: "aligned_nano_slit_with_reservoirs_2d"
 
 grid:
-  nano_slit_with_reservoirs_2d:
+  aligned_nano_slit_with_reservoirs_2d:
     pore_radius : 10e-9
     pore_length : 50e-9
     reservoir_height: 20e-9
 
 non_dim:
-    L_REF : 10e-9
+    L_REF : 50e-9
 
 species_parameters:
   species : [2,3]
-  solvent_size : 5e-10
-  ion_sizes : [5e-10,5e-10]
+  solvent_size : 2.75e-10
+  ion_sizes : [2.54e-10,0.76e-10]
   diffusivities : [5e-9,5e-9]
 
 boundary_conditions:
   dirichlet:
     species : [1,2,3]
-    boundary_indices : [[1,3],[1],[1,4]]
+    boundary_indices : [[4,5],[4],[4,2]]
     boundary_values : [[0.0,11.8],[1.0],[1.0,1.1]]
 
 #solver_parameters:

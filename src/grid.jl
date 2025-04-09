@@ -109,6 +109,49 @@ function get_nano_slit_with_reservoirs_2d(parameters)
     return grid
 end
 
+"""
+Aligned NanoSlit
+"""
+@option mutable struct AlignedNanoSlitWithResevoirs2DParams
+    pore_radius::Float64 = 10e-9 # pore radius in [meter]
+    pore_length::Float64 = 50e-9 # pore length in [meter]
+    reservoir_height::Float64 = 80e-9 # reservoir height [meter]
+end
+
+function validate_aligned_nano_slit_with_reservoirs_2d(parameters)
+    params = parameters.grid.aligned_nano_slit_with_reservoirs_2d
+    params.pore_radius > 0.0 || throw(AssertionError("The pore radius must be larger than 0."))
+    params.pore_length > 0.0 || throw(AssertionError("The pore length must be larger than 0."))
+    params.reservoir_height > 0.0 || throw(AssertionError("The reservoir height must be larger than 0."))
+end
+
+function get_aligned_nano_slit_with_reservoirs_2d(parameters)
+    # first, we normalize the geometry inputs
+    params = parameters.grid.aligned_nano_slit_with_reservoirs_2d
+    r = params.pore_radius / parameters.non_dim.L_REF
+    l = params.pore_length / parameters.non_dim.L_REF
+    h = params.reservoir_height / parameters.non_dim.L_REF
+    # we will generate a bounding box that goes from 0 to 3l with the middle l section to be the pore
+    # for the radius, we will have the tube at the top with a total height of l
+    hmin = 0.005
+    hmax = 0.1
+    Xleft = geomspace(0.0, l, hmax, hmin)
+    Xmid = collect(l:hmin:2*l)
+    Xright = geomspace(2 * l, 3 * l, hmin, hmax)
+    hbottom = 0.05
+    hwall = 0.005
+    hcenterline = 0.01
+    Ybot = geomspace(0.0, h - r, hmax, hwall)
+    Ytop = geomspace(h - r, h, hwall, hcenterline)
+    X = glue(Xleft, glue(Xmid, Xright))
+    Y = glue(Ybot, Ytop)
+    parent = simplexgrid(X, Y)
+    rect!(parent, [l, 0], [2 * l, h - r]; region=2, bregion=1)
+    grid = subgrid(parent, [1])
+    bfacemask!(grid, [l, h - r], [2 * l, h - r], 5)
+    return grid
+end
+
 
 """
 This is the dictionary that will store all the different grids and return the proper one
@@ -117,12 +160,14 @@ This is the dictionary that will store all the different grids and return the pr
 grids_dict = Dict(
     "equally_spaced_1d" => get_equally_spaced_1d,
     "nano_slit_with_reservoirs_2d" => get_nano_slit_with_reservoirs_2d,
+    "aligned_nano_slit_with_reservoirs_2d" => get_aligned_nano_slit_with_reservoirs_2d,
 )
 
 # Dictionary mapping keys to function calls
 validation_dict = Dict(
     "equally_spaced_1d" => validate_equally_spaced_1d_parameters,
     "nano_slit_with_reservoirs_2d" => validate_nano_slit_with_reservoirs_2d,
+    "aligned_nano_slit_with_reservoirs_2d" => validate_aligned_nano_slit_with_reservoirs_2d,
 )
 
 """
@@ -165,6 +210,8 @@ Here we define the struct of Grid Parameters which contains all the parameters o
 @option struct GridParameters
     equally_spaced_1d::EquallySpaced1dParams = EquallySpaced1dParams()
     nano_slit_with_reservoirs_2d::NanoSlitWithResevoirs2DParams = NanoSlitWithResevoirs2DParams()
+    aligned_nano_slit_with_reservoirs_2d::AlignedNanoSlitWithResevoirs2DParams = AlignedNanoSlitWithResevoirs2DParams()
+
 end
 
 """
