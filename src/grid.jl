@@ -152,6 +152,82 @@ function get_aligned_nano_slit_with_reservoirs_2d(parameters)
     return grid
 end
 
+"""
+Aligned Channel with two Unstructured Reservoirs
+"""
+@option mutable struct AlignedNanoSlitWithUnstructuredResevoirs2DParams
+    pore_radius::Float64 = 10e-9 # pore radius in [meter]
+    pore_length::Float64 = 50e-9 # pore length in [meter]
+    reservoir_height::Float64 = 80e-9 # reservoir height [meter]
+end
+
+function validate_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
+    params = parameters.grid.aligned_nano_slit_with_unstructured_reservoirs_2d
+    params.pore_radius > 0.0 || throw(AssertionError("The pore radius must be larger than 0."))
+    params.pore_length > 0.0 || throw(AssertionError("The pore length must be larger than 0."))
+    params.reservoir_height > 0.0 || throw(AssertionError("The reservoir height must be larger than 0."))
+end
+
+function get_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
+    # first, we normalize the geometry inputs
+    params = parameters.grid.aligned_nano_slit_with_unstructured_reservoirs_2d
+    r = params.pore_radius / parameters.non_dim.L_REF
+    l = params.pore_length / parameters.non_dim.L_REF
+    h = params.reservoir_height / parameters.non_dim.L_REF
+    # we first generate the grid for the nano channel only
+    hwall_normal = 0.0005
+    hwall_tangential = 0.002
+    hcenterline = 0.1 * r
+    Xchannel = collect(l:hwall_tangential:2*l)
+    Ychannel = geomspace(h - r, h, hwall_normal, hcenterline)
+    channel_grid = simplexgrid(Xchannel, Ychannel)
+    # next, we generate the grid builder for the left reservoir
+    left_reservoir_builder = SimplexGridBuilder(; Generator=Triangulate)
+    cellregion!(left_reservoir_builder, 1) # this is our inside domain
+    p1 = point!(left_reservoir_builder, 0, 0)
+    p2 = point!(left_reservoir_builder, l, 0)
+    p3 = point!(left_reservoir_builder, l, h - r)
+    p4 = point!(left_reservoir_builder, l, h)
+    p5 = point!(left_reservoir_builder, 0, h)
+    # we also add the boundaries
+    facetregion!(left_reservoir_builder, 5)
+    facet!(left_reservoir_builder, p5, p1)
+    facetregion!(left_reservoir_builder, 6)
+    facet!(left_reservoir_builder, p1, p2)
+    facet!(left_reservoir_builder, p2, p3)
+    facetregion!(left_reservoir_builder, 4)
+    facet!(left_reservoir_builder, p3, p4)
+    facetregion!(left_reservoir_builder, 3)
+    facet!(left_reservoir_builder, p4, p5)
+    bregions!(left_reservoir_builder, channel_grid, 4)
+    left_reservoir = simplexgrid(left_reservoir_builder, maxvolume=0.0001)
+    # we glue the left reservoir to the channel
+    left_plus_channel = glue(left_reservoir, channel_grid)
+    # finally, we do the same for the right reservior
+    # next, we generate the grid builder for the left reservoir
+    right_reservoir_builder = SimplexGridBuilder(; Generator=Triangulate)
+    cellregion!(right_reservoir_builder, 1) # this is our inside domain
+    p1r = point!(right_reservoir_builder, 3 * l, 0)
+    p2r = point!(right_reservoir_builder, 2 * l, 0)
+    p3r = point!(right_reservoir_builder, 2 * l, h - r)
+    p4r = point!(right_reservoir_builder, 2 * l, h)
+    p5r = point!(right_reservoir_builder, 3 * l, h)
+    # we also add the boundaries
+    facetregion!(right_reservoir_builder, 9)
+    facet!(right_reservoir_builder, p5r, p1r)
+    facetregion!(right_reservoir_builder, 6)
+    facet!(right_reservoir_builder, p1r, p2r)
+    facet!(right_reservoir_builder, p2r, p3r)
+    facetregion!(right_reservoir_builder, 2)
+    facet!(right_reservoir_builder, p3r, p4r)
+    facetregion!(right_reservoir_builder, 3)
+    facet!(right_reservoir_builder, p4r, p5r)
+    bregions!(right_reservoir_builder, channel_grid, 2)
+    right_reservoir = simplexgrid(right_reservoir_builder, maxvolume=0.0001)
+    # we glue the right reservoir to the channel + left
+    grid = glue(left_plus_channel, right_reservoir)
+    return grid
+end
 
 """
 This is the dictionary that will store all the different grids and return the proper one
@@ -161,6 +237,7 @@ grids_dict = Dict(
     "equally_spaced_1d" => get_equally_spaced_1d,
     "nano_slit_with_reservoirs_2d" => get_nano_slit_with_reservoirs_2d,
     "aligned_nano_slit_with_reservoirs_2d" => get_aligned_nano_slit_with_reservoirs_2d,
+    "aligned_nano_slit_with_unstructured_reservoirs_2d" => get_aligned_nano_slit_with_unstructured_reservoirs_2d,
 )
 
 # Dictionary mapping keys to function calls
@@ -168,7 +245,7 @@ validation_dict = Dict(
     "equally_spaced_1d" => validate_equally_spaced_1d_parameters,
     "nano_slit_with_reservoirs_2d" => validate_nano_slit_with_reservoirs_2d,
     "aligned_nano_slit_with_reservoirs_2d" => validate_aligned_nano_slit_with_reservoirs_2d,
-)
+    "aligned_nano_slit_with_unstructured_reservoirs_2d" => validate_aligned_nano_slit_with_unstructured_reservoirs_2d)
 
 """
 asdf
@@ -211,7 +288,7 @@ Here we define the struct of Grid Parameters which contains all the parameters o
     equally_spaced_1d::EquallySpaced1dParams = EquallySpaced1dParams()
     nano_slit_with_reservoirs_2d::NanoSlitWithResevoirs2DParams = NanoSlitWithResevoirs2DParams()
     aligned_nano_slit_with_reservoirs_2d::AlignedNanoSlitWithResevoirs2DParams = AlignedNanoSlitWithResevoirs2DParams()
-
+    aligned_nano_slit_with_unstructured_reservoirs_2d::AlignedNanoSlitWithUnstructuredResevoirs2DParams = AlignedNanoSlitWithUnstructuredResevoirs2DParams()
 end
 
 """

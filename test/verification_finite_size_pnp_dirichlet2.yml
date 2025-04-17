@@ -1,0 +1,27 @@
+case: "verification_finite_size_pnp_dirichlet2"
+output_directory : "verification_finite_size_pnp_dirichlet2"
+pnp_type: "SMPNP"
+grid_type: "equally_spaced_1d"
+
+grid:
+  equally_spaced_1d:
+    pore_radius : 5e-9
+
+non_dim:
+    L_REF : 5e-9
+
+species_parameters:
+  species : [2,3]
+  solvent_size : 5e-10
+  ion_sizes : [6.299605e-10,5e-10]
+  diffusivities : [5e-9,5e-9]
+
+boundary_conditions:
+  dirichlet:
+    species : [1,2,3]
+    boundary_indices : [[1,2],[2],[2]]
+    boundary_values : [[40,0],[1],[1]]
+
+time_parameters:
+  
+  final_time : 1e-4

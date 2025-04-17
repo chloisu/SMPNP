@@ -19,6 +19,14 @@ grid:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
     reservoir_height: 8.0e-8
+  aligned_nano_slit_with_reservoirs_2d:
+    pore_radius: 1.0e-8
+    pore_length: 5.0e-8
+    reservoir_height: 8.0e-8
+  aligned_nano_slit_with_unstructured_reservoirs_2d:
+    pore_radius: 1.0e-8
+    pore_length: 5.0e-8
+    reservoir_height: 8.0e-8
 output_directory: "verification_finite_size_pnp_dirichlet"
 non_dim:
   L_REF: 5.0e-9
@@ -66,8 +74,8 @@ solver_parameters:
   method_linear: ~
 time_parameters:
   solve_to_steady_state: true
-  steady_state_tol: 1.0e-5
+  steady_state_tol: 1.0e-12
   final_time: 0.0001
   max_timestep: 4.999999999999999e-7
   initial_timestep: 1.0e-12
-  plot_time_interval: 1.0e-8
+  plot_time_interval: 5.0e-10
