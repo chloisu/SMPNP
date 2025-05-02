@@ -1,10 +1,10 @@
 case: "test_case"
 grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
-pnp_type : "PNP"
+pnp_type : "SMPNP"
 
 grid:
   aligned_nano_slit_with_unstructured_reservoirs_2d:
-    pore_radius : 3e-9
+    pore_radius : 2e-9
     pore_length : 50e-9
     reservoir_height: 20e-9
 
@@ -13,15 +13,15 @@ non_dim:
 
 species_parameters:
   species : [2,3]
-  #solvent_size : 0.275e-9
-  #ion_sizes : [0.254e-9,0.076e-9]
+  solvent_size : 0.275e-9
+  ion_sizes : [0.254e-9,0.076e-9]
   diffusivities : [2e-10,2e-10]
 
 boundary_conditions:
   dirichlet:
     species : [1,2,3]
     boundary_indices : [[5,1],[5],[5,9]]
-    boundary_values : [[0.0,11.8],[1.0],[1.0,1.0]]
+    boundary_values : [[0.0,38.7],[1.0],[1.0,1.1]]
     
 
 time_parameters:

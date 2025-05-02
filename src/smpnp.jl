@@ -17,7 +17,6 @@ using SimplexGridFactory
 using LinearAlgebra
 using YAML
 using Configurations
-using Metal
 using ArgParse
 using GLMakie
 using JLD2

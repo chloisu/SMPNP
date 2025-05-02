@@ -175,7 +175,7 @@ function get_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
     l = params.pore_length / parameters.non_dim.L_REF
     h = params.reservoir_height / parameters.non_dim.L_REF
     # we first generate the grid for the nano channel only
-    hwall_normal = 0.0001
+    hwall_normal = 0.0002
     hwall_tangential = 0.002
     hcenterline = 0.01 * r
     Xchannel = collect(l:hwall_tangential:2*l)

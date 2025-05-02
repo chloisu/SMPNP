@@ -58,21 +58,29 @@ docker run --rm -it my_project
 The code solves the coupled Poisson-Nernst-Planck equations for the following quantities:
 $$c_- \quad \text{concentration of anions}$$
 $$c_+ \quad \text{concentration of cations}$$
-$$\psi_e \quad \text{electrical potential}$$
+$$\phi \quad \text{electrical potential}$$
 
 ### **Non-dimensionalization**
 The variables in governing equations are dimensionless. They are made non-dimensional by the following scalings wich can also be found in[^bazant_lecture_notes]
 
-$\tilde{x} = \frac{x}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{i,ref}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{ref}},\quad \tilde{D_i} = \frac{D_i}{D_{i,ref}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\nabla} = L\nabla$
+$$
+    \tilde{\mathbf{x}} = \frac{\mathbf{x}}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{\text{ref}}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{\text{ref}}},\quad \tilde{D_i} = \frac{D_i}{D_{\text{ref}}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\mathbf{\nabla}} = L\mathbf{\nabla}
+$$
+Here, $\mathbf{x} = (x,y)^T$ is the two-dimensional space vector, $L$ (\unit[per-mode = symbol]{\meter}) is a chosen reference length of the system, $c_{\text{ref}}$, $D_{\text{ref}}$, $\varepsilon_{\text{ref}}$ are reference scales for concentration, diffusion coefficient and permittivity with the same units as the non-reference quantities.
 
-In the following, we drop the tilda notation for non-dimensional variables and assume that all variables are non-dimensional.
 ### **Governing equations**
 The dimensionless governing PNP equations then read as
 $$
-    \frac{\partial c^-}{\partial t} = \nabla \cdot \left(M_- c_-\nabla \mu_-(\mathbf{c})\right)\\
-    \frac{\partial \mathbf{c}_+}{\partial t} = \nabla \cdot \left(M_+ \mathbf{c}_+ \nabla \mu_+(\mathbf{c})\right)\\
-    \lambda_D \nabla^2 \phi = -\frac{1}{\varepsilon}(c_+-c_-)
+
+    \frac{\partial \tilde{c}_i}{\partial \tilde{t}} = \tilde{\nabla} \cdot (\tilde{D}_i \tilde{c}_i \tilde{\nabla} \tilde{\mu}_i)\\
+ \tilde{\lambda}_D^2\tilde{\nabla}^2\tilde{\phi}= -\frac{4\pi}{\tilde{\varepsilon}}\sum_j z_j\tilde{c_j}
 $$
+
+where $\tilde{\lambda}_D = \lambda_D/L=\sqrt{\varepsilon_{\text{ref}} k_BT/(\sum_i (z_ie)^2 c_{\text{ref}})}/L$ is the Debye length. The relation for the chemical potential $\tilde{\mu}_i$ is given as 
+$$
+\tilde{\mu}_i = \ln\left(\tilde{c}_i m_i\right) - \frac{m_i}{m_0}\ln\left({1-\sum_j\tilde{c}_jm_j}\right) + z_i\tilde{\phi},
+$$
+where $m_i = a_i^3c_{\text{ref}}$ and $m_0 = a_0^3c_{\text{ref}}$.
 
 ## Code Verificaiton
 To verify the implementation, we compare the numerically computed solutions for two cases against analytical and semi-analytical expressions.
