@@ -155,9 +155,9 @@ function smpnp()
     # setup the time-dependent system
     sys2 = get_time_dependent_system(grid, parameters)
     # we also setup the other systems to look at the different fluxes individually
-    sys_diff = get_diffusion_flux_system(grid, parameters)
-    sys_pot = get_potential_flux_system(grid, parameters)
-    sys_size = get_size_flux_system(grid, parameters)
+    #sys_diff = get_diffusion_flux_system(grid, parameters)
+    #sys_pot = get_potential_flux_system(grid, parameters)
+    #sys_size = get_size_flux_system(grid, parameters)
     # apply boundary and initial conditions
     apply_dirichlet_for_time_dependent!(sys2, parameters)
     U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)

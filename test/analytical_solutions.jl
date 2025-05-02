@@ -10,9 +10,16 @@ end
 
 function potential_pb_1d(grid, wall_potential, r)
     g = grid
-    lambda_d = LAMBDA_D / r
+    lambda_d = sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / 2 / MOL_PER_LITER_TO_PER_CUBIC_METER) / r
     a = exp(wall_potential / 2) + 1
     b = exp(wall_potential / 2) - 1
+    return map(x -> 2 * log((a + b * exp(-x / lambda_d)) / (a - b * exp(-x / lambda_d))), g)
+end
+
+function potential_pb_1d_v2(grid, wall_potential, r)
+    g = grid
+    kappa = sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / MOL_PER_LITER_TO_PER_CUBIC_METER) / r
+
     return map(x -> 2 * log((a + b * exp(-x / lambda_d)) / (a - b * exp(-x / lambda_d))), g)
 end
 

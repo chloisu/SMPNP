@@ -23,6 +23,7 @@ about the different species.
     solvent_size::Float64 = 0.0
     ion_sizes::Vector{Float64} = zeros(Float64, NUM_CONCENTRATION_SPECIES)# ion sizes
     diffusivities::Vector{Float64} = zeros(Float64, NUM_CONCENTRATION_SPECIES) # the diffusivities are required, so we don't provide a default value 
+    epsilon_r::Float64 = 80 # the relative permittivity
 end
 
 """
@@ -46,4 +47,7 @@ function validate_species_parameters(species_params, pnp_type)
     for (diffusivity, species) in zip(species_params.diffusivities, species_params.species)
         diffusivity > 0.0 || throw(ArgumentError("The diffusivity size of species $species cannot be negative."))
     end
+
+    species_params.epsilon_r > 0.0 || throw(ArgumentError("The relative permittivity cannot be negative or zero."))
 end
+

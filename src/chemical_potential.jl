@@ -12,14 +12,14 @@ function μ(c1, c2, z1, ϕ, parameters::Parameters)
     #end
     #
     if parameters.pnp_type == "SMPNP"
-        m0 = parameters.species_parameters.solvent_size^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
+        m0 = parameters.species_parameters.solvent_size^3 * parameters.non_dim.C_REF
         if z1 == Z_ANION
-            m1 = parameters.species_parameters.ion_sizes[ANION_EQ-1]^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
-            m2 = parameters.species_parameters.ion_sizes[CATION_EQ-1]^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
+            m1 = parameters.species_parameters.ion_sizes[ANION_EQ-1]^3 * parameters.non_dim.C_REF
+            m2 = parameters.species_parameters.ion_sizes[CATION_EQ-1]^3 * parameters.non_dim.C_REF
         end
         if z1 == Z_CATION
-            m1 = parameters.species_parameters.ion_sizes[CATION_EQ-1]^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
-            m2 = parameters.species_parameters.ion_sizes[ANION_EQ-1]^3 * MOL_PER_LITER_TO_PER_CUBIC_METER
+            m1 = parameters.species_parameters.ion_sizes[CATION_EQ-1]^3 * parameters.non_dim.C_REF
+            m2 = parameters.species_parameters.ion_sizes[ANION_EQ-1]^3 * parameters.non_dim.C_REF
         end
         sum = 1 - c1 * m1 - c2 * m2
         μ1 = (rlog(c1 * m1) - m1 / m0 * rlog(sum)) + z1 * ϕ

@@ -11,6 +11,7 @@ species_parameters:
   diffusivities:
     - 5.0e-9
     - 5.0e-9
+  epsilon_r: 80.0
 grid_type: "equally_spaced_1d"
 grid:
   equally_spaced_1d:
@@ -30,9 +31,10 @@ grid:
 output_directory: "verification_simple_pnp"
 non_dim:
   L_REF: 1.0e-8
-  C_REF: 1.0
+  C_REF: 6.0221407599999996e26
   D_REF: 5.0e-9
   PHI_REF: 0.02526449777465668
+  EPSILON_REF: 7.08335025504e-10
 boundary_conditions:
   dirichlet:
     species:

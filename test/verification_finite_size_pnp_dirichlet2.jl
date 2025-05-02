@@ -10,7 +10,7 @@ phi_numerical = U[1, :]
 ca_numerical = U[2, :]
 cc_numerical = U[3, :]
 # second, we load the analytical solutions
-phi_analytical = potential_pb_1d(grid, 0.3, 50e-9)
+phi_analytical = potential_pb_1d(grid, 40, 5e-9)
 ca_analytical, cc_analytical = concentrations_smpnp_1d(phi_numerical, 6.299605e-10, 5e-10, 5e-10, 1, 1, 2, 1)
 p = GridVisualizer(;
     Plotter=GLMakie,
