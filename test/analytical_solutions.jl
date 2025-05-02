@@ -18,9 +18,9 @@ end
 
 function potential_pb_1d_v2(grid, wall_potential, r)
     g = grid
-    kappa = sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / MOL_PER_LITER_TO_PER_CUBIC_METER) / r
+    kappa = 1.0 / (sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / 2 / MOL_PER_LITER_TO_PER_CUBIC_METER) / r)
 
-    return map(x -> 2 * log((a + b * exp(-x / lambda_d)) / (a - b * exp(-x / lambda_d))), g)
+    return map(x -> 4 * atanh(tanh(wall_potential / 4) * exp(-x * kappa)), g)
 end
 
 function concentrations_pb_1d(grid, wall_potential, r)
