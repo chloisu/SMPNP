@@ -5,10 +5,10 @@ grid_type: "equally_spaced_1d"
 
 grid:
   equally_spaced_1d:
-    pore_radius : 5e-9
+    pore_radius : 1e-8
 
 non_dim:
-    L_REF : 5e-9
+    L_REF : 1e-8
 
 species_parameters:
   species : [2,3]

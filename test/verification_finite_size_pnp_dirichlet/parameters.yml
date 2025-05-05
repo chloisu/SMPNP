@@ -15,7 +15,7 @@ species_parameters:
 grid_type: "equally_spaced_1d"
 grid:
   equally_spaced_1d:
-    pore_radius: 5.0e-9
+    pore_radius: 1.0e-8
   nano_slit_with_reservoirs_2d:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
@@ -30,7 +30,7 @@ grid:
     reservoir_height: 8.0e-8
 output_directory: "verification_finite_size_pnp_dirichlet"
 non_dim:
-  L_REF: 5.0e-9
+  L_REF: 1.0e-8
   C_REF: 6.0221407599999996e26
   D_REF: 5.0e-9
   PHI_REF: 0.02526449777465668

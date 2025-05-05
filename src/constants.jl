@@ -17,7 +17,7 @@ const EPSILON_VAC = 8.8541878188e-12 # vacuum permittivity [F/m]
 const T = 293.15 #Temperature [K]
 const BETA = 1.0 / K_B / T # [1/J]
 # physical prefactor of Poisson equation
-const POISSON_PHYS_PREFACTOR = K_B * T / 4 / pi / E_CHARGE^2
+const POISSON_PHYS_PREFACTOR = K_B * T / E_CHARGE^2
 
 # conversion constants
 MOL_PER_LITER_TO_PER_CUBIC_METER = N_A * 1e3 #from mol/L to m^-3
