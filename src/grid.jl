@@ -159,6 +159,11 @@ Aligned Channel with two Unstructured Reservoirs
     pore_radius::Float64 = 10e-9 # pore radius in [meter]
     pore_length::Float64 = 50e-9 # pore length in [meter]
     reservoir_height::Float64 = 80e-9 # reservoir height [meter]
+    hwall_normal::Float64 = 0.0002 # cell size normal to the wall [non-dimensional units]
+    hwall_tangential::Float64 = 0.002 # cell size tangential to the wall [non-dimensional units]
+    hcenterline::Float64 = 0.01 # cell size at the centerline in fraction of non-dimensional radius 
+    #(i.e. 0.1 means that the cell will have a size of one-tenth of the radius.)
+    maxvolume::Float64 = 0.0001 # maximum cell volume in non-dimensional units for the simplex grid builder
 end
 
 function validate_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
@@ -175,9 +180,9 @@ function get_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
     l = params.pore_length / parameters.non_dim.L_REF
     h = params.reservoir_height / parameters.non_dim.L_REF
     # we first generate the grid for the nano channel only
-    hwall_normal = 0.0002
-    hwall_tangential = 0.002
-    hcenterline = 0.01 * r
+    hwall_normal = params.hwall_normal
+    hwall_tangential = params.hwall_tangential
+    hcenterline = params.hcenterline * r
     Xchannel = collect(l:hwall_tangential:2*l)
     Ychannel = geomspace(h - r, h, hwall_normal, hcenterline)
     channel_grid = simplexgrid(Xchannel, Ychannel)
@@ -200,7 +205,7 @@ function get_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
     facetregion!(left_reservoir_builder, 3)
     facet!(left_reservoir_builder, p4, p5)
     bregions!(left_reservoir_builder, channel_grid, 4)
-    left_reservoir = simplexgrid(left_reservoir_builder, maxvolume=0.0001)
+    left_reservoir = simplexgrid(left_reservoir_builder, maxvolume=params.maxvolume)
     # we glue the left reservoir to the channel
     left_plus_channel = glue(left_reservoir, channel_grid)
     # finally, we do the same for the right reservior
@@ -223,7 +228,7 @@ function get_aligned_nano_slit_with_unstructured_reservoirs_2d(parameters)
     facetregion!(right_reservoir_builder, 3)
     facet!(right_reservoir_builder, p4r, p5r)
     bregions!(right_reservoir_builder, channel_grid, 2)
-    right_reservoir = simplexgrid(right_reservoir_builder, maxvolume=0.0001)
+    right_reservoir = simplexgrid(right_reservoir_builder, maxvolume=params.maxvolume)
     # we glue the right reservoir to the channel + left
     grid = glue(left_plus_channel, right_reservoir)
     return grid
