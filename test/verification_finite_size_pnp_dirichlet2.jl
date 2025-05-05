@@ -1,6 +1,6 @@
 include("../src/smpnp.jl")
 include("analytical_solutions.jl")
-
+using GLMakie
 # This setup was generated with the help of ChatGPT (OpenAI).
 # now that we have main available, lets run it and get the steady state solution
 global ARGS = ["verification_finite_size_pnp_dirichlet2.yml"]  # Simulate command-line arguments

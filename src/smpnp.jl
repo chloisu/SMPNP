@@ -18,7 +18,6 @@ using LinearAlgebra
 using YAML
 using Configurations
 using ArgParse
-using GLMakie
 using JLD2
 
 include("constants.jl")
@@ -118,10 +117,6 @@ function smpnp()
     filename = joinpath(output_dir, "grid")
     writeVTK(filename * ".vtu", grid)
     @save filename * ".jld2" grid
-    # TODO: make the grid output nicer
-    vis = GridVisualizer(Plotter=GLMakie)
-    gridplot!(vis, grid; size=(3000, 1000))
-    GLMakie.save(joinpath(output_dir, "grid.png"), reveal(vis))
     # setup the system for the initial timestep
     sys = get_initial_timestep_system(grid, parameters)
     # specfiy boundary + initial conditions for the intial timestep
@@ -136,11 +131,9 @@ function smpnp()
     @assert PHI_EQ == 1 # make sure that the potential species is the first species
     initial_potential = U[1, :]
     # solve initial timestep
-    #nf = nodeflux(sys, U)
     filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, 0.0))
     writeVTK(filename * ".vtu", grid, phi=U[1, :])
     @save filename * ".jld2" U
-    #writeVTK(joinpath(output_dir, filename), grid, phi=U[1, :], gradphi=nf[:, 1, :])
     # check if there are any nan values in the initial solution
     if any(isnan.(U))
         error("Initial potential contains NaN values!")
@@ -153,10 +146,6 @@ function smpnp()
 
     # setup the time-dependent system
     sys2 = get_time_dependent_system(grid, parameters)
-    # we also setup the other systems to look at the different fluxes individually
-    #sys_diff = get_diffusion_flux_system(grid, parameters)
-    #sys_pot = get_potential_flux_system(grid, parameters)
-    #sys_size = get_size_flux_system(grid, parameters)
     # apply boundary and initial conditions
     apply_dirichlet_for_time_dependent!(sys2, parameters)
     U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)
@@ -192,10 +181,6 @@ function smpnp()
             continue
         end
         if time ≈ t_plot
-            #nf = nodeflux(sys2, U)
-            #nf_diff = nodeflux(sys_diff, U)
-            #nf_pot = nodeflux(sys_pot, U)
-            #nf_size = nodeflux(sys_size, U)
             filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, time))
             writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :])
             @save filename * ".jld2" U
