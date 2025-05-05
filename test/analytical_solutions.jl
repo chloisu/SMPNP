@@ -16,10 +16,16 @@ function potential_pb_1d(grid, wall_potential, r)
     return map(x -> 2 * log((a + b * exp(-x / lambda_d)) / (a - b * exp(-x / lambda_d))), g)
 end
 
+"""
+Analytical potential expression taken from 
+Hunter, R. J. (2013). Zeta potential in colloid science: 
+principles and applications (Vol. 2). Academic press.
+Kappa is compute from equation (2.3.9) and normalized with the radius here.
+The potential expression is then given by (2.3.16)
+"""
 function potential_pb_1d_v2(grid, wall_potential, r)
     g = grid
     kappa = 1.0 / (sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / 2 / MOL_PER_LITER_TO_PER_CUBIC_METER) / r)
-
     return map(x -> 4 * atanh(tanh(wall_potential / 4) * exp(-x * kappa)), g)
 end
 
