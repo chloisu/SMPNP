@@ -83,7 +83,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
         println(current_tol)
         print("Tolerance")
         println(parameters.time_parameters.steady_state_tol)
-        if current_tol > parameters.time_parameters.steady_state_tol
+        if current_time < parameters.time_parameters.minimum_steady_state_time || current_tol > parameters.time_parameters.steady_state_tol
             return true
         else
             # we are done
