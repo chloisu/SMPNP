@@ -1,0 +1,41 @@
+Assuming unrestricted shared filesystem usage.
+None
+host: Niklauss-MacBook-Pro.local
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count
+------------  -------
+all                 1
+process_case        1
+total               2
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue May  6 15:42:44 2025]
+localrule process_case:
+    input: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml, /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd
+    output: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    jobid: 1
+    reason: Missing output files: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    wildcards: postprocessing_folder=/Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs, case=20250506_r_10nm_h_20nm_l_50nm_phiT_50
+    resources: tmpdir=/var/folders/kj/t5ng7vn156s9gxcdwjt64fpw0000gn/T
+
+[Tue May  6 15:42:46 2025]
+Finished jobid: 1 (Rule: process_case)
+1 of 2 steps (50%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue May  6 15:42:46 2025]
+localrule all:
+    input: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    jobid: 0
+    reason: Input files updated by another job: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    resources: tmpdir=/var/folders/kj/t5ng7vn156s9gxcdwjt64fpw0000gn/T
+
+[Tue May  6 15:42:46 2025]
+Finished jobid: 0 (Rule: all)
+2 of 2 steps (100%) done
+Complete log(s): /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Code/PNP/VoronoiFVM/.snakemake/log/2025-05-06T154244.271629.snakemake.log

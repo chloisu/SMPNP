@@ -13,11 +13,21 @@ yml_file = sys.argv[1]
 pvd_file = sys.argv[2]
 output_file = sys.argv[3]
 
-input_file = pvd_file
+# ========== Get parameters from .yml file ==========
+with open(yml_file, 'r') as f:
+    mydict = yaml.safe_load(f)
+
+print(mydict)
+# Example: extract values from the config
+grid_type = mydict["grid_type"]
+h = mydict["grid"][grid_type]["reservoir_height"]
+r = mydict["grid"][grid_type]["pore_radius"]
+l = mydict["grid"][grid_type]["pore_length"]
+L_REF = mydict["non_dim"]["L_REF"]
 
 # ========== Load PVD File ==========
 # Load data
-reader = PVDReader(FileName=input_file)
+reader = PVDReader(FileName=pvd_file)
 reader.UpdatePipeline()
 timesteps = reader.TimestepValues
 print("Available timesteps:", timesteps)
@@ -84,4 +94,4 @@ proxy.GetClientSideObject().SetOutput(input0.VTKObject)
 
 # Save the data using the proxy
 SaveData(output_file, proxy=proxy)
-print(" Flux computation complete. Output saved to flux_output.vtu.")
+print(" Flux computation complete.")

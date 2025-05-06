@@ -1,0 +1,59 @@
+Assuming unrestricted shared filesystem usage.
+None
+host: Niklauss-MacBook-Pro.local
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count
+------------  -------
+all                 1
+process_case        1
+total               2
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue May  6 15:22:47 2025]
+localrule process_case:
+    input: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml, /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd
+    output: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    jobid: 1
+    reason: Missing output files: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    wildcards: postprocessing_folder=/Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs, case=20250506_r_10nm_h_20nm_l_50nm_phiT_50
+    resources: tmpdir=/var/folders/kj/t5ng7vn156s9gxcdwjt64fpw0000gn/T
+
+RuleException:
+CalledProcessError in file "/Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Code/PNP/VoronoiFVM/Snakefile", line 20:
+Command 'set -euo pipefail;  
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env ./scripts/postprocessing/paraview_compute_fluxes.py /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu' returned non-zero exit status 1.
+[Tue May  6 15:22:48 2025]
+Error in rule process_case:
+    message: None
+    jobid: 1
+    input: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml, /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd
+    output: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    shell:
+        
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env ./scripts/postprocessing/paraview_compute_fluxes.py /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+        
+        (command exited with non-zero exit code)
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look below for error messages
+[Tue May  6 15:22:48 2025]
+Error in rule process_case:
+    message: None
+    jobid: 1
+    input: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml, /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd
+    output: /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+    shell:
+        
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env ./scripts/postprocessing/paraview_compute_fluxes.py /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/out.pvd /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/raw_simulation_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/parameters.yml /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Data/postprocessing_outputs/20250506_r_10nm_h_20nm_l_50nm_phiT_50/with_additional_fields.vtu
+        
+        (command exited with non-zero exit code)
+Complete log(s): /Users/nik/Documents/projects/2025_IonTrappingInCoatedSeparator_OSU_Collaboration/Code/PNP/VoronoiFVM/.snakemake/log/2025-05-06T152247.309904.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.

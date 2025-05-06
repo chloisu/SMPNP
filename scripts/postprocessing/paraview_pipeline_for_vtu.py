@@ -2,16 +2,34 @@ from paraview.simple import *
 import glob
 import os
 import csv
+import sys
+import yaml
+
+yml_file = sys.argv[1]
+vtu_file = sys.argv[2]
+output_file = sys.argv[3]
+
+# ========== Get parameters from .yml file ==========
+with open(yml_file, 'r') as f:
+    config = yaml.safe_load(f)
+
+# Example: extract values from the config
+h = config["grid"]["aligned_nano_slit_with_unstructured_reservoirs_2d"]["reservoir_height"]
+r = config["grid"]["aligned_nano_slit_with_unstructured_reservoirs_2d"]["pore_radius"]
+l = config["grid"]["aligned_nano_slit_with_unstructured_reservoirs_2d"]["pore_length"]
+L_REF = config["non_dim"]["L_REF"]
+h_non_dim = h/L_REF
+r_non_dim = r/L_REF
+l_non_dim = l/L_REF
 
 # Disable automatic rendering to improve performance
 paraview.simple._DisableFirstRenderCameraReset()
 
 # Parameters to customize
-vtu_file_path = 'fluxtemp.vtu'  # Path to your .pvd file
-line_point1 = [0, 0, 0]              # Starting point of line
-line_point2 = [1, 0, 0]                # Ending point of line
-num_samples = 100                          # Number of points along the line
-output_dir = '.'   # Path to save the CSV file
+vtu_file_path = vtu_file  # Path to your .pvd file
+line_point1 = [l_non_dim*1.5, h_non_dim-r_non_dim, 0]              # Starting point of line
+line_point2 = [l_non_dim*1.5, h_non_dim, 0]                # Ending point of line
+num_samples = 1000                        # Number of points along the line
 
 print(f"Reading PVD file: {vtu_file_path}")
 
@@ -56,7 +74,7 @@ for i in range(table.GetNumberOfPoints()):
 
 # Define output CSV per timestep, embedding time in filename
 # Example: profile_t0.1234.csv
-csv_file = os.path.join(output_dir, "test.csv")
+csv_file = output_file
 
 # Write CSV without separate Time column
 with open(csv_file, "w", newline="") as csvfile:
