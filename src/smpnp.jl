@@ -69,7 +69,7 @@ end
 this is a small custom function to check if we are done with the time loop of the simulation.
 That depends on whether or not we solve for a specific final time or for the steady state.
 """
-function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters, in_time_loop)
+function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous_timestep, parameters, in_time_loop, Δt)
     # check if we have even started
     if !in_time_loop
         print("Exit from (1)")
@@ -78,7 +78,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
     # else we check the conditions
     if parameters.time_parameters.solve_to_steady_state
         # check if we have reached the steady state
-        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / (maximum(abs.(U_previous_timestep)) + eps())
+        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / Δt#(maximum(abs.(U_previous_timestep)) + eps())
         print("Current tolerance")
         println(current_tol)
         print("Tolerance")
@@ -161,7 +161,7 @@ function smpnp()
     # time loop
     in_time_loop = false
     # time loop via simple call to solve
-    while check_if_stay_in_time_loop(time, U, U_old, parameters, in_time_loop)
+    while check_if_stay_in_time_loop(time, U, U_old, parameters, in_time_loop, Δt)
         in_time_loop = true
         try
             print("Solving timestep at time: ")
