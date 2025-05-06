@@ -143,7 +143,8 @@ function smpnp()
     time = 0.0
     Δt = parameters.time_parameters.initial_timestep
     t_plot = parameters.time_parameters.plot_time_interval
-
+    # flush output
+    flush(stdout)
     # setup the time-dependent system
     sys2 = get_time_dependent_system(grid, parameters)
     # apply boundary and initial conditions
@@ -189,6 +190,8 @@ function smpnp()
         end
         # decide on new timestep
         Δt = min(min(Δt, parameters.time_parameters.max_timestep), t_plot - time)
+        # flush output 
+        flush(stdout)
     end
     # and we are done
     generate_pvd(output_dir, "out.pvd")
