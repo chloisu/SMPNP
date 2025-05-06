@@ -78,7 +78,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
     # else we check the conditions
     if parameters.time_parameters.solve_to_steady_state
         # check if we have reached the steady state
-        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / Δt#(maximum(abs.(U_previous_timestep)) + eps())
+        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / Δt / (maximum(abs.(U_previous_timestep)) + eps())
         print("Current tolerance")
         println(current_tol)
         print("Tolerance")
@@ -109,7 +109,9 @@ function smpnp()
     parameters = load_config_file(args["parameters"])
     # next, we want to generate the output directory
     output_dir = create_output_directory(parameters)
-    # Save parameters to YAML
+    # Copy the provided input yml file as input.yml
+    # and save all parameters including default to parameters.yml
+    copy_parameters_yaml(args["parameters"], output_dir)
     save_parameters_to_yaml(parameters, output_dir)
     # generate grid
     grid = get_grid(parameters.grid_type, parameters)#generate_grid_2d(parameters)#

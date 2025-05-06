@@ -7,7 +7,7 @@ import csv
 paraview.simple._DisableFirstRenderCameraReset()
 
 # Parameters to customize
-vtu_file_path = 'flux_output.vtu'  # Path to your .pvd file
+vtu_file_path = 'fluxtemp.vtu'  # Path to your .pvd file
 line_point1 = [0, 0, 0]              # Starting point of line
 line_point2 = [1, 0, 0]                # Ending point of line
 num_samples = 100                          # Number of points along the line

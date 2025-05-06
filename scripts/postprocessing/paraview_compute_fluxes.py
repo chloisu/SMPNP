@@ -2,15 +2,18 @@
 
 import sys
 import numpy as np
+import yaml
 from paraview.simple import *
 from vtk.numpy_interface import dataset_adapter as dsa
 from paraview.vtk.vtkFiltersGeneral import vtkGradientFilter
 from paraview import servermanager
 from paraview.simple import TrivialProducer
 
+yml_file = sys.argv[1]
+pvd_file = sys.argv[2]
+output_file = sys.argv[3]
 
-
-input_file = "../../../../Data/20250417_r_dependency_h80/r1/out.pvd"
+input_file = pvd_file
 
 # ========== Load PVD File ==========
 # Load data
@@ -80,5 +83,5 @@ proxy = TrivialProducer()
 proxy.GetClientSideObject().SetOutput(input0.VTKObject)
 
 # Save the data using the proxy
-SaveData("flux_output.vtu", proxy=proxy)
+SaveData(output_file, proxy=proxy)
 print(" Flux computation complete. Output saved to flux_output.vtu.")

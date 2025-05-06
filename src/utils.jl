@@ -31,6 +31,21 @@ function save_parameters_to_yaml(params, output_dir)
 end
 
 """
+This function was generated with the help of ChatGPT (OpenAI).
+It copies the provided YAML file to the output directory.
+"""
+function copy_parameters_yaml(parameters_path::String, output_dir::String)
+    # Ensure the output directory exists
+    isdir(output_dir) || mkpath(output_dir)
+
+    # Define the destination file path
+    dest_file = joinpath(output_dir, "input.yml")
+
+    # Copy the file
+    cp(parameters_path, dest_file; force=true)
+end
+
+"""
     rlog(u; eps=1.0e-20)
 
 Regularized logarithm. Smooth linear continuation for `x<eps`.
