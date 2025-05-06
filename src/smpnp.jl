@@ -78,7 +78,7 @@ function check_if_stay_in_time_loop(current_time, U_current_timestep, U_previous
     # else we check the conditions
     if parameters.time_parameters.solve_to_steady_state
         # check if we have reached the steady state
-        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / Δt / (maximum(abs.(U_previous_timestep)) + eps())
+        current_tol = maximum(abs.(U_current_timestep .- U_previous_timestep)) / (maximum(abs.(U_previous_timestep)) + eps())
         print("Current tolerance")
         println(current_tol)
         print("Tolerance")
