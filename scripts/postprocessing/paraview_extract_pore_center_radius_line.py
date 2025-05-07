@@ -22,13 +22,17 @@ h_non_dim = h/L_REF
 r_non_dim = r/L_REF
 l_non_dim = l/L_REF
 
+start_x = l_non_dim*1.5
+end_x = l_non_dim*1.5
+start_y = h_non_dim-r_non_dim
+end_y = h_non_dim
 # Disable automatic rendering to improve performance
 paraview.simple._DisableFirstRenderCameraReset()
 
 # Parameters to customize
 vtu_file_path = vtu_file  # Path to your .pvd file
-line_point1 = [l_non_dim*1.5, h_non_dim-r_non_dim, 0]              # Starting point of line
-line_point2 = [l_non_dim*1.5, h_non_dim, 0]                # Ending point of line
+line_point1 = [start_x, start_y+1e-6, 0]              # Starting point of line
+line_point2 = [end_x, end_y-1e-6, 0]                # Ending point of line
 num_samples = 1000                        # Number of points along the line
 
 print(f"Reading PVD file: {vtu_file_path}")
@@ -55,27 +59,41 @@ plot_line.UpdatePipeline()
 # Fetch VTK table
 table = servermanager.Fetch(plot_line)
 
-array_names = []  # will be populated after first extraction
 pt_data = table.GetPointData()
-array_names = [pt_data.GetArray(i).GetName() for i in range(pt_data.GetNumberOfArrays())]
+array_names = []
+array_components = []
+
+for i in range(pt_data.GetNumberOfArrays()):
+    arr = pt_data.GetArray(i)
+    name = arr.GetName()
+    n_comp = arr.GetNumberOfComponents()
+    if n_comp == 1:
+        array_names.append(name)
+        array_components.append((name, None))  # Scalar field
+    else:
+        for c in range(n_comp):
+            comp_name = f"{name}:{c}"
+            array_names.append(comp_name)
+            array_components.append((name, c))  # Vector component
 
 # Collect rows for this timestep (omit Time column since it is in filename)
 rows = []
 for i in range(table.GetNumberOfPoints()):
     x, y, z = table.GetPoints().GetPoint(i)
-    # Only spatial coords and field values
     row = [x, y, z]
-    for name in array_names:
-        arr = table.GetPointData().GetArray(name)
-        row.append(arr.GetValue(i))
+    for base_name, comp in array_components:
+        arr = pt_data.GetArray(base_name)
+        if comp is None:
+            value = arr.GetValue(i)
+        else:
+            value = arr.GetComponent(i, comp)
+        row.append(value)
     rows.append(row)
 
 # Define output CSV per timestep, embedding time in filename
 # Example: profile_t0.1234.csv
-csv_file = os.path.join("test.csv")
-print(array_names)
 # Write CSV without separate Time column
-with open(csv_file, "w", newline="") as csvfile:
+with open(output_file, "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     header = ["X", "Y", "Z"] + array_names
     writer.writerow(header)

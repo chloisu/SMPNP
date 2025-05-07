@@ -1,6 +1,7 @@
 configfile: "snakemake_config.yml"
 
-cases = ["20250506_r_10nm_h_20nm_l_50nm_phiT_50"]
+cases = ["20250506_r_10nm_h_40nm_l_50nm_phiT_15","20250506_r_10nm_h_80nm_l_50nm_phiT_15","20250506_r_10nm_h_120nm_l_50nm_phiT_15"]
+
 raw_data = config["RAW_DATA"]
 postprocessing_folder = config["POSTPROCESSING_DATA"]
 
