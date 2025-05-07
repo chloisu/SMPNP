@@ -12,4 +12,4 @@ scratch.jl
 output**/**
 **/output**/**
 figure/
-
+.snakemake/**
