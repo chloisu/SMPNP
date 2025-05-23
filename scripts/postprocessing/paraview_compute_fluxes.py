@@ -60,6 +60,10 @@ input0.PointData.append(ln_cminus, 'ln_cminus_temp')
 ln_sum_minus = -mminus / m0 * np.log(np.maximum(1 - mplus * cplus - mminus * cminus, 1e-12))
 input0.PointData.append(ln_sum_minus, 'ln_sum_minus_temp')
 
+# ========== Chemical Potential ==========
+mu_plus = np.log(cplus*mplus) - mplus/m0*np.log(np.maximum(1 - mplus * cplus - mminus * cminus, 1e-12)) + phi
+input0.PointData.append(mu_plus, 'mu_plus')
+
 # ========== Gradient Helper ==========
 def compute_gradient(input_data, array_name, result_name):
     grad = vtkGradientFilter()
@@ -75,6 +79,8 @@ grad_ln_sum_plus = compute_gradient(input0, 'ln_sum_plus_temp', 'grad_ln_sum_plu
 grad_phi = compute_gradient(input0, 'phi', 'grad_phi')
 grad_ln_cminus = compute_gradient(input0, 'ln_cminus_temp', 'grad_ln_cminus')
 grad_ln_sum_minus = compute_gradient(input0, 'ln_sum_minus_temp', 'grad_ln_sum_minus')
+
+
 
 # ========== Compute Fluxes ==========
 input0.PointData.append(grad_ln_cplus * cplus, 'diff_flux_cplus')

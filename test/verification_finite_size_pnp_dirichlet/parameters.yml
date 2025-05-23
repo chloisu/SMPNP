@@ -28,6 +28,10 @@ grid:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
     reservoir_height: 8.0e-8
+    hwall_normal: 0.0002
+    hwall_tangential: 0.002
+    hcenterline: 0.01
+    maxvolume: 0.0001
 output_directory: "verification_finite_size_pnp_dirichlet"
 non_dim:
   L_REF: 1.0e-8
@@ -76,8 +80,9 @@ solver_parameters:
   method_linear: ~
 time_parameters:
   solve_to_steady_state: true
-  steady_state_tol: 1.0e-12
-  final_time: 0.0001
+  steady_state_tol: 0.0001
+  minimum_steady_state_time: 1.0
+  final_time: 0.001
   max_timestep: 4.999999999999999e-7
   initial_timestep: 1.0e-12
   plot_time_interval: 5.0e-10

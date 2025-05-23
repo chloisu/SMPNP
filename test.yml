@@ -1,16 +1,19 @@
 case: "test_case"
-output_directory: "r_10nm_38_phiT"
+output_directory: "r_400"
 grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
 pnp_type : "SMPNP"
 
 grid:
   aligned_nano_slit_with_unstructured_reservoirs_2d:
-    pore_radius : 10e-9
-    pore_length : 80e-9
-    reservoir_height: 20e-9
+    pore_radius : 400e-9
+    pore_length : 50e-9
+    reservoir_height: 480e-9
+    maxvolume : 0.002
+    hwall_tangential : 0.0025
+    hcenterline : 0.01
 
 non_dim:
-    L_REF : 80e-9
+    L_REF : 50e-9
 
 species_parameters:
   species : [2,3]
