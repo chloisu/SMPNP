@@ -12,7 +12,7 @@ species_parameters:
     - 2.0e-10
     - 2.0e-10
   epsilon_r: 80.0
-grid_type: "partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d"
+grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
 grid:
   equally_spaced_1d:
     pore_radius: 1.0e-8
@@ -36,11 +36,11 @@ grid:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
     reservoir_height: 8.0e-8
-    width_of_structured_region: 1.0e-8
+    width_of_structured_region: 2.0e-8
     hwall_normal: 0.0002
-    hwall_tangential: 0.0025
+    hwall_tangential: 0.002
     hcenterline: 0.01
-    maxvolume: 0.001
+    maxvolume: 0.0001
 output_directory: "test"
 non_dim:
   L_REF: 5.0e-8

@@ -368,6 +368,7 @@ validation_dict = Dict(
     "equally_spaced_1d" => validate_equally_spaced_1d_parameters,
     "nano_slit_with_reservoirs_2d" => validate_nano_slit_with_reservoirs_2d,
     "aligned_nano_slit_with_reservoirs_2d" => validate_aligned_nano_slit_with_reservoirs_2d,
+    "aligned_nano_slit_with_unstructured_reservoirs_2d" => validate_aligned_nano_slit_with_unstructured_reservoirs_2d,
     "partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d" => validate_partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d)
 
 """
