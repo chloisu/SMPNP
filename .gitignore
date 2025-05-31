@@ -14,4 +14,3 @@ output**/**
 figure/
 .snakemake/**
 .snakemake/*
-test/

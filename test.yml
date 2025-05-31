@@ -1,13 +1,14 @@
 case: "test_case"
-output_directory: "test"
-grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
+output_directory: "testcase"
+grid_type: "partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d"
 pnp_type : "SMPNP"
 
 grid:
-  aligned_nano_slit_with_unstructured_reservoirs_2d:
+  partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d:
     pore_radius : 10e-9
-    pore_length : 50e-9
+    pore_length : 200e-9
     reservoir_height: 80e-9
+    width_of_structured_region: 10e-9
 
 non_dim:
     L_REF : 50e-9

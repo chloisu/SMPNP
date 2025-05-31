@@ -252,6 +252,8 @@ Partially Aligned Channel with Rest Unstructured and Unstructured Reservoirs
     hcenterline::Float64 = 0.01 # cell size at the centerline in fraction of non-dimensional radius 
     #(i.e. 0.1 means that the cell will have a size of one-tenth of the radius.)
     maxvolume::Float64 = 0.0001 # maximum cell volume in non-dimensional units for the simplex grid builder
+    areacontrol::Float64 = 0.0005 # value used to define when an unstructured cell close to the wall needs to be further refined.
+    # smaller values, leed to smaller cells close to the wall.
 end
 
 function validate_partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d(parameters)
@@ -264,6 +266,7 @@ function validate_partially_aligned_nano_slit_with_rest_unstructured_and_unstruc
     params.hwall_tangential > 0.0 || throw(AssertionError("The wall tangential cell width must be larger than 0."))
     params.hcenterline > 0.0 || throw(AssertionError("The centerline cell height must be larger than 0."))
     params.maxvolume > 0.0 || throw(AssertionError("The maximum cell volume must be larger than 0."))
+    params.areacontrol > 0.0 || throw(AssertionError("The area control parameter must be larger than 0."))
 end
 
 function get_partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d(parameters)
@@ -293,7 +296,7 @@ function get_partially_aligned_nano_slit_with_rest_unstructured_and_unstructured
         rf_x = max(min_x, min(bary[1], max_x))
         refinement_center = [rf_x, h - r]
         dist = norm(bary - refinement_center)
-        if area > 0.0005 * dist
+        if area > params.areacontrol * dist
             needs_refinement = 1
         end
         return needs_refinement
