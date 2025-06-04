@@ -19,6 +19,9 @@ rule all:
        case=cases) +
        expand("{folder}/{case}/extract_inlet_line.csv",
        folder=postprocessing_folder,
+       case=cases) +
+       expand("{folder}/{case}/extract_along_x_center_line.csv",
+       folder=postprocessing_folder,
        case=cases)
 
 rule compute_additional_flux_fields:
@@ -55,4 +58,16 @@ rule extract_inlet_line:
         """
         export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
         pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env ./scripts/postprocessing/paraview_extract_inlet_line.py {input.yml} {input.vtu} {output.csv}
+        """
+
+rule extract_along_x_center_line:
+    input:
+        yml=lambda wildcards: f"{raw_data}/{wildcards.case}/parameters.yml",
+        vtu=lambda wildcards: f"{postprocessing_folder}/{wildcards.case}/with_additional_fields.vtu"
+    output:
+        csv="{postprocessing_folder}/{case}/extract_along_x_center_line.csv"
+    shell:
+        """
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env ./scripts/postprocessing/paraview_extract_along_x_center_line.py {input.yml} {input.vtu} {output.csv}
         """
