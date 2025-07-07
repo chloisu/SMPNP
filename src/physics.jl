@@ -47,6 +47,7 @@ function get_time_dependent_system(grid, parameters=:nothing)
     non_dim_permittivity = parameters.species_parameters.epsilon_r * EPSILON_VAC / reference_permittivity
     additional_non_dim_prefactor = reference_permittivity / L^2 / parameters.non_dim.C_REF * non_dim_permittivity
     prefactor = POISSON_PHYS_PREFACTOR * additional_non_dim_prefactor
+    print("PREFACTOR is " * string(prefactor))
     #1.0 / (4 * pi * L^2 * L_B * parameters.non_dim.C_REF)
     # we scale the diffusivities of the two concentration equations
     D_a_norm = parameters.species_parameters.diffusivities[ANION_EQ-1] / parameters.non_dim.D_REF

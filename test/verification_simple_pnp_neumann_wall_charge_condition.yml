@@ -1,0 +1,30 @@
+case: "verification_simple_pnp_neumann_wall_charge_condition"
+output_directory : "verification_simple_pnp_neumann_wall_charge_condition"
+pnp_type: "PNP"
+grid_type: "equally_spaced_1d"
+
+grid:
+  equally_spaced_1d:
+    pore_radius : 10e-9
+
+non_dim:
+    L_REF : 10e-9
+
+species_parameters:
+  species : [2,3]
+  diffusivities : [5e-9,5e-9]
+
+boundary_conditions:
+  dirichlet:
+    species : [1,2,3]
+    boundary_indices : [[2],[2],[2]]
+    boundary_values : [[0.0],[1.0],[1.0]]
+  neumann:
+    species : [1]
+    boundary_indices : [[1]]
+    boundary_values : [[0.0183356]] 
+    # value calculated with ChatGPT from the derivative of the analytical solution for phi = 0.3 at the wall
+    # and kappa also from the verifaction_simple_pnp.jl case.
+    # the Neumann value is not simply dphi/dx but actually -prefactor*dphi/dx where the prefactor is given from the
+    # physics module. 
+

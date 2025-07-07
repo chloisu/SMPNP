@@ -26,6 +26,7 @@ The potential expression is then given by (2.3.16)
 function potential_pb_1d_v2(grid, wall_potential, r, C_REF=MOL_PER_LITER_TO_PER_CUBIC_METER)
     g = grid
     kappa = 1.0 / (sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / 2 / C_REF) / r)
+    print("Kappa is " * string(kappa))
     return map(x -> 4 * atanh(tanh(wall_potential / 4) * exp(-x * kappa)), g)
 end
 

@@ -75,6 +75,7 @@ function check_parameters(parameters)
     validate_grid_parameters(parameters.grid_type, parameters)
     validate_non_dim(parameters.non_dim)
     validate_dirichlet_boundary_conditions(parameters.boundary_conditions.dirichlet)
+    validate_neumann_boundary_conditions(parameters.boundary_conditions.neumann)
     validate_initial_conditions(parameters.initial_conditions)
     validate_time_parameters(parameters.time_parameters)
     return true

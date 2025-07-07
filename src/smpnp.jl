@@ -123,6 +123,7 @@ function smpnp()
     sys = get_initial_timestep_system(grid, parameters)
     # specfiy boundary + initial conditions for the intial timestep
     apply_dirichlet_for_initial_timestep!(sys, parameters)
+    apply_neumann_for_initial_timestep!(sys, parameters)
     apply_initial_conditions_for_intial_timestep!(sys, parameters)
     # setup the Newton solver
     control = VoronoiFVM.SolverControl()
@@ -151,6 +152,7 @@ function smpnp()
     sys2 = get_time_dependent_system(grid, parameters)
     # apply boundary and initial conditions
     apply_dirichlet_for_time_dependent!(sys2, parameters)
+    apply_neumann_for_time_dependent!(sys2, parameters)
     U = apply_initial_condition_for_time_dependent!(sys2, parameters, initial_potential)
     # setup helper solution vector
     U_previous_timestep = similar(U)

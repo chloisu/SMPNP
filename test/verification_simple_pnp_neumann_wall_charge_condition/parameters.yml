@@ -1,4 +1,4 @@
-case: "verificaion_simple_pnp"
+case: "verification_simple_pnp_neumann_wall_charge_condition"
 pnp_type: "PNP"
 species_parameters:
   species:
@@ -42,7 +42,7 @@ grid:
     hcenterline: 0.01
     maxvolume: 0.0001
     areacontrol: 0.0005
-output_directory: "verification_simple_pnp"
+output_directory: "verification_simple_pnp_neumann_wall_charge_condition"
 non_dim:
   L_REF: 1.0e-8
   C_REF: 6.0221407599999996e26
@@ -57,7 +57,6 @@ boundary_conditions:
       - 3
     boundary_indices:
       -
-        - 1
         - 2
       -
         - 2
@@ -65,16 +64,20 @@ boundary_conditions:
         - 2
     boundary_values:
       -
-        - 0.3
         - 0.0
       -
         - 1.0
       -
         - 1.0
   neumann:
-    species: []
-    boundary_indices: []
-    boundary_values: []
+    species:
+      - 1
+    boundary_indices:
+      -
+        - 1
+    boundary_values:
+      -
+        - 0.0183356
 initial_conditions:
   species:
     - 1
