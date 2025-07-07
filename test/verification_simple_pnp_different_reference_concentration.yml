@@ -1,0 +1,22 @@
+case: "verificaion_simple_pnp"
+output_directory : "verification_simple_pnp_different_reference_concentration"
+pnp_type: "PNP"
+grid_type: "equally_spaced_1d"
+
+grid:
+  equally_spaced_1d:
+    pore_radius : 10e-9
+
+non_dim:
+    L_REF : 10e-9
+    C_REF : 3.01107038e+26
+
+species_parameters:
+  species : [2,3]
+  diffusivities : [5e-9,5e-9]
+
+boundary_conditions:
+  dirichlet:
+    species : [1,2,3]
+    boundary_indices : [[1,2],[2],[2]]
+    boundary_values : [[0.3,0.0],[1.0],[1.0]]

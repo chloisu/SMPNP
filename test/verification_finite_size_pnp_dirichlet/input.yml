@@ -5,7 +5,7 @@ grid_type: "equally_spaced_1d"
 
 grid:
   equally_spaced_1d:
-    pore_radius : 1e-8
+    pore_radius : 5e-9
 
 non_dim:
     L_REF : 1e-8

@@ -1,13 +1,13 @@
-case: "verification_finite_size_pnp_dirichlet2"
-pnp_type: "SMPNP"
+case: "verificaion_simple_pnp"
+pnp_type: "PNP"
 species_parameters:
   species:
     - 2
     - 3
-  solvent_size: 5.0e-10
+  solvent_size: 0.0
   ion_sizes:
-    - 6.299605e-10
-    - 5.0e-10
+    - 0.0
+    - 0.0
   diffusivities:
     - 5.0e-9
     - 5.0e-9
@@ -15,7 +15,7 @@ species_parameters:
 grid_type: "equally_spaced_1d"
 grid:
   equally_spaced_1d:
-    pore_radius: 5.0e-9
+    pore_radius: 1.0e-8
   nano_slit_with_reservoirs_2d:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
@@ -42,10 +42,10 @@ grid:
     hcenterline: 0.01
     maxvolume: 0.0001
     areacontrol: 0.0005
-output_directory: "verification_finite_size_pnp_dirichlet2"
+output_directory: "verification_simple_pnp_different_reference_concentration"
 non_dim:
-  L_REF: 5.0e-9
-  C_REF: 6.0221407599999996e26
+  L_REF: 1.0e-8
+  C_REF: 3.01107038e26
   D_REF: 5.0e-9
   PHI_REF: 0.02526449777465668
   EPSILON_REF: 7.08335025504e-10
@@ -65,7 +65,7 @@ boundary_conditions:
         - 2
     boundary_values:
       -
-        - 40.0
+        - 0.3
         - 0.0
       -
         - 1.0
@@ -92,7 +92,7 @@ time_parameters:
   solve_to_steady_state: true
   steady_state_tol: 0.0001
   minimum_steady_state_time: 1.0
-  final_time: 0.0001
+  final_time: 1000.0
   max_timestep: 4.999999999999999e-7
   initial_timestep: 1.0e-12
   plot_time_interval: 5.0e-10
