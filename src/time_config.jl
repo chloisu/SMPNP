@@ -5,7 +5,7 @@ parameter file.
 """
 @option mutable struct TimeParameters
     solve_to_steady_state::Bool = true
-    steady_state_tol::Float64 = 1e-4
+    steady_state_tol::Float64 = 1e-7
     # the following parameter describes the minimum time in non dimensional units that we wait 
     # until we check if we have reached the steady state. This should avoid difficulties with very small
     # initial timesteps that might trigger the relative steady state tolerance threshold otherwise.

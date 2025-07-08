@@ -45,6 +45,7 @@ function get_time_dependent_system(grid, parameters=:nothing)
     L = parameters.non_dim.L_REF
     reference_permittivity = parameters.non_dim.EPSILON_REF * EPSILON_VAC
     non_dim_permittivity = parameters.species_parameters.epsilon_r * EPSILON_VAC / reference_permittivity
+    print("ref permittivitiy is " * string(reference_permittivity))
     additional_non_dim_prefactor = reference_permittivity / L^2 / parameters.non_dim.C_REF * non_dim_permittivity
     prefactor = POISSON_PHYS_PREFACTOR * additional_non_dim_prefactor
     print("PREFACTOR is " * string(prefactor))
