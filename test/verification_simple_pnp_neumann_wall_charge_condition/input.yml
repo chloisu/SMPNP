@@ -22,5 +22,9 @@ boundary_conditions:
   neumann:
     species : [1]
     boundary_indices : [[1]]
-    boundary_values : [[0.0183356]]
+    boundary_values : [[0.0183356]] 
+    # value calculated with ChatGPT from the derivative of the analytical solution for phi = 0.3 at the wall
+    # and kappa also from the verifaction_simple_pnp.jl case.
+    # the Neumann value is not simply dphi/dx but actually -prefactor*dphi/dx where the prefactor is given from the
+    # physics module. 
 
