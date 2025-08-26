@@ -17,21 +17,23 @@ equally spaced grid in one direction
 
 @option struct EquallySpaced1dParams
     pore_radius::Float64 = 10e-9 # pore radius in [meter]
+    grid_size::Float64 = 0.001 # grid size in non-dimensional units
 end
 
 function validate_equally_spaced_1d_parameters(parameters)
     params = parameters.grid.equally_spaced_1d
     params.pore_radius > 0.0 || throw(AssertionError("The pore radius must be larger than 0."))
+    params.grid_size > 0.0 || throw(AssertionError("The non dimensional grid size must be larger than 0."))
 
 end
 
 function get_equally_spaced_1d(parameters)
     # first, we normalize the geometry inputs
     r = parameters.grid.equally_spaced_1d.pore_radius / parameters.non_dim.L_REF
-    X = collect(0:0.001:r)
+    h = parameters.grid.equally_spaced_1d.grid_size
+    X = collect(0:h:r)
     return simplexgrid(X)
 end
-
 
 
 """

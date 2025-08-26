@@ -23,15 +23,15 @@ principles and applications (Vol. 2). Academic press.
 Kappa is compute from equation (2.3.9) and normalized with the radius here.
 The potential expression is then given by (2.3.16)
 """
-function potential_pb_1d_v2(grid, wall_potential, r, C_REF=MOL_PER_LITER_TO_PER_CUBIC_METER)
+function potential_pb_1d_v2(grid, wall_potential, r; C_REF=MOL_PER_LITER_TO_PER_CUBIC_METER, epsilon_r=80)
     g = grid
-    kappa = 1.0 / (sqrt(EPSILON_VAC * 80 * K_B * T / E_CHARGE^2 / 2 / C_REF) / r)
+    kappa = 1.0 / (sqrt(EPSILON_VAC * epsilon_r * K_B * T / E_CHARGE^2 / 2 / C_REF) / r)
     print("Kappa is " * string(kappa))
     return map(x -> 4 * atanh(tanh(wall_potential / 4) * exp(-x * kappa)), g)
 end
 
-function concentrations_pb_1d(grid, wall_potential, r, C_REF=MOL_PER_LITER_TO_PER_CUBIC_METER)
-    potential_fun = potential_pb_1d_v2(grid, wall_potential, r, C_REF)
+function concentrations_pb_1d(grid, wall_potential, r; C_REF=MOL_PER_LITER_TO_PER_CUBIC_METER, epsilon_r=80)
+    potential_fun = potential_pb_1d_v2(grid, wall_potential, r; C_REF, epsilon_r)
     ca = map(x -> exp(-Z_ANION * x), potential_fun)
     cc = map(x -> exp(-Z_CATION * x), potential_fun)
     return ca, cc

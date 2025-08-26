@@ -1,4 +1,4 @@
-case: "verificaion_simple_pnp"
+case: "simple_pnp"
 pnp_type: "PNP"
 species_parameters:
   species:
@@ -11,12 +11,11 @@ species_parameters:
   diffusivities:
     - 5.0e-9
     - 5.0e-9
-  epsilon_r: 80.0
+  epsilon_r: 31.0
 grid_type: "equally_spaced_1d"
 grid:
   equally_spaced_1d:
     pore_radius: 1.0e-8
-    grid_size: 1.0e-5
   nano_slit_with_reservoirs_2d:
     pore_radius: 1.0e-8
     pore_length: 5.0e-8
@@ -43,7 +42,7 @@ grid:
     hcenterline: 0.01
     maxvolume: 0.0001
     areacontrol: 0.0005
-output_directory: "verification_simple_pnp"
+output_directory: "verification_simple_pnp_different_epsilon_r"
 non_dim:
   L_REF: 1.0e-8
   C_REF: 6.0221407599999996e26
@@ -87,7 +86,7 @@ initial_conditions:
     - 1.0
 solver_parameters:
   verbose: true
-  abstol: 1.0e-10
+  abstol: 1.0e-6
   reltol: 1.0e-10
   maxiters: 5
   reltol_linear: 1.0e-8
@@ -95,7 +94,7 @@ solver_parameters:
   method_linear: ~
 time_parameters:
   solve_to_steady_state: true
-  steady_state_tol: 1.0e-10
+  steady_state_tol: 1.0e-7
   minimum_steady_state_time: 1.0
   final_time: 1000.0
   max_timestep: 4.999999999999999e-7

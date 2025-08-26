@@ -1,12 +1,11 @@
-case: "verificaion_simple_pnp"
-output_directory : "verification_simple_pnp"
+case: "verificaion_simple_pnp_with_units"
+output_directory : "verificaion_simple_pnp_with_units"
 pnp_type: "PNP"
 grid_type: "equally_spaced_1d"
 
 grid:
   equally_spaced_1d:
     pore_radius : 10e-9
-    grid_size : 0.00001
 
 non_dim:
     L_REF : 10e-9
@@ -14,15 +13,10 @@ non_dim:
 species_parameters:
   species : [2,3]
   diffusivities : [5e-9,5e-9]
+  epsilon_r : 31
 
 boundary_conditions:
   dirichlet:
     species : [1,2,3]
     boundary_indices : [[1,2],[2],[2]]
     boundary_values : [[0.3,0.0],[1.0],[1.0]]
-
-time_parameters:
-  steady_state_tol: 1e-10
-
-solver_parameters:
-  abstol : 1e-10
