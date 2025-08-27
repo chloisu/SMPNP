@@ -14,3 +14,6 @@ output**/**
 figure/
 .snakemake/**
 .snakemake/*
+2025*/**
+*.yml
+*.sh
