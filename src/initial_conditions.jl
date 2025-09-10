@@ -43,7 +43,7 @@ function apply_initial_condition_for_time_dependent!(sys, parameters, potential_
         if species == PHI_EQ
             inival[PHI_EQ, :] = potential_from_initial_timestep
         else
-            inival[species, :] .= initial_condition_parameters.values[species]
+            inival[species, :] .= map((x, y) -> 1.0 + 0.1 / 3 * x, sys.grid)#map(x -> 1.1 - 0.1 / 3 * x, sys.grid)#initial_condition_parameters.values[species]
         end
     end
     return inival
