@@ -72,18 +72,25 @@ def compute_gradient(input_data, array_name, result_name):
     return dsa.WrapDataObject(grad.GetOutput()).PointData[result_name]
 
 # ========== Compute Gradients ==========
+grad_cplus = compute_gradient(input0, 'cplus', 'grad_cplus')
 grad_ln_cplus = compute_gradient(input0, 'ln_cplus_temp', 'grad_ln_cplus')
 grad_ln_sum_plus = compute_gradient(input0, 'ln_sum_plus_temp', 'grad_ln_sum_plus')
 grad_phi = compute_gradient(input0, 'phi', 'grad_phi')
+grad_cminus = compute_gradient(input0, 'cminus', 'grad_cminus')
 grad_ln_cminus = compute_gradient(input0, 'ln_cminus_temp', 'grad_ln_cminus')
 grad_ln_sum_minus = compute_gradient(input0, 'ln_sum_minus_temp', 'grad_ln_sum_minus')
 
 # ========== Compute Fluxes ==========
+
+input0.PointData.append(grad_cplus, 'grad_cplus')
+input0.PointData.append(grad_ln_cplus, 'grad_ln_cplus')
 input0.PointData.append(grad_ln_cplus * cplus, 'diff_flux_cplus')
 input0.PointData.append(grad_ln_sum_plus * cplus, 'diff_size_cplus')
 input0.PointData.append(grad_phi * cplus, 'migration_flux_cplus')
 input0.PointData.append(cplus * (grad_ln_cplus + grad_ln_sum_plus + grad_phi), 'total_flux_cplus')
 
+input0.PointData.append(grad_cminus, 'grad_cminus')
+input0.PointData.append(grad_ln_cminus, 'grad_ln_cminus')
 input0.PointData.append(grad_ln_cminus * cminus, 'diff_flux_cminus')
 input0.PointData.append(grad_ln_sum_minus * cminus, 'diff_size_cminus')
 input0.PointData.append(-grad_phi * cminus, 'migration_flux_cminus')
@@ -98,7 +105,7 @@ D_REF = float(mydict["non_dim"]["D_REF"])
 
 # extract other inputs
 D_plus = float(mydict["species_parameters"]["diffusivities"][constants.CATION_EQ-2])
-D_minus = float(mydict["species_parameters"]["ion_sizes"][constants.ANION_EQ -2])
+D_minus = float(mydict["species_parameters"]["diffusivities"][constants.ANION_EQ -2])
 # primary variables
 cminus_1_per_cubic_meter = cminus * C_REF
 cplus_1_per_cubic_meter= cplus * C_REF
@@ -111,6 +118,10 @@ mu_plus_potential_joule = constants.E_CHARGE*PHI_REF*phi
 mu_minus_diff_joule = KB_T*ln_cminus
 mu_minus_size_joule = KB_T*ln_sum_minus
 mu_minus_potential_joule = -constants.E_CHARGE*PHI_REF*phi
+## gradients
+grad_cplus_1_per_meter_to_the_4 = grad_cplus * C_REF / L_REF
+grad_minus_1_per_meter_to_the_4 = grad_cminus * C_REF / L_REF
+grad_phi_volt_per_meter = grad_phi * PHI_REF / L_REF
 ## fluxes
 # diffusion
 diff_flux_cplus_1_per_meter_squared_per_second = D_REF*C_REF/L_REF*(D_plus/D_REF)*cplus*grad_ln_cplus
@@ -137,6 +148,10 @@ input0.PointData.append(mu_minus_diff_joule, 'mu_minus_diff_joule')
 input0.PointData.append(mu_minus_size_joule, 'mu_minus_size_joule')
 input0.PointData.append(mu_minus_potential_joule, 'mu_minus_potential_joule')
 
+input0.PointData.append(grad_cplus_1_per_meter_to_the_4, 'grad_cplus_1_per_meter_to_the_4')
+input0.PointData.append(grad_minus_1_per_meter_to_the_4, 'grad_minus_1_per_meter_to_the_4')
+input0.PointData.append(grad_phi_volt_per_meter, 'grad_phi_volt_per_meter')
+
 input0.PointData.append(diff_flux_cplus_1_per_meter_squared_per_second, 'diff_flux_cplus_1_per_meter_squared_per_second')
 input0.PointData.append(diff_flux_cminus_1_per_meter_squared_per_second, 'diff_flux_cminus_1_per_meter_squared_per_second')
 
@@ -148,6 +163,9 @@ input0.PointData.append(size_flux_cminus_1_per_meter_squared_per_second, 'size_f
 
 input0.PointData.append(tota_flux_cplus_1_per_meter_squared_per_second, 'tota_flux_cplus_1_per_meter_squared_per_second')
 input0.PointData.append(tota_flux_cminus_1_per_meter_squared_per_second, 'tota_flux_cminus_1_per_meter_squared_per_second')
+
+
+
 
 # ========== Save Output ==========
 # Create a ParaView proxy from your modified VTK data
