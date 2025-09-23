@@ -57,7 +57,7 @@ function get_time_dependent_system(grid, parameters=:nothing)
     physics = VoronoiFVM.Physics(
         ; reaction=function (f, u, node, data)
             # source term of the poisson equation
-            f[1] = -(Z_ANION * u[2] + Z_CATION * u[3])
+            f[1] = 0.0#-(Z_ANION * u[2] + Z_CATION * u[3])
             return nothing
         end,
         flux=function (f, u, edge, data)
