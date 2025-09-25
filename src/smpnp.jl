@@ -198,6 +198,10 @@ function smpnp()
         flush(stdout)
     end
     # and we are done
+    # always save at the end
+    filename = joinpath(output_dir, @sprintf("%010.*f", TIME_WRITE_PRECISION, time))
+    writeVTK(filename * ".vtu", grid, phi=U[1, :], cminus=U[2, :], cplus=U[3, :])
+    @save filename * ".jld2" U
     generate_pvd(output_dir, "out.pvd")
     return grid, U
 end
