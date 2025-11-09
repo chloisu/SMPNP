@@ -1,0 +1,53 @@
+configfile: "papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/snakemake_config.yml"
+
+from pathlib import Path
+
+# --- CONFIGURATION AND SETUP ---
+raw_data = config["RAW_DATA"]
+postprocessing_folder = config["POSTPROCESSING_DATA"]
+scripts_dir = config["SCRIPTS_DIR"]
+
+# --- WILDCARDS ---
+# Get a list of folder names in 'raw_data/' directory
+cases = [p.name for p in Path(raw_data).iterdir() if p.is_dir()]
+
+# Define the different extraction types to avoid repetition.
+EXTRACTIONS = [
+    "pore_center_radius_line",
+    "inlet_line",
+    "along_x_center_line",
+]
+
+# --- RULES ---
+rule all:
+    input:
+        expand("{folder}/{case}/with_additional_fields.vtu",
+            folder=postprocessing_folder,
+            case=cases),
+        expand("{folder}/{case}/extract_{extraction}.csv",
+            folder=postprocessing_folder,
+            case=cases,
+            extraction=EXTRACTIONS)
+
+rule compute_additional_flux_fields:
+    input:
+        yml=f"{raw_data}/{{case}}/parameters.yml",
+        pvd=f"{raw_data}/{{case}}/out.pvd",
+        script=f"{scripts_dir}/postprocessing/paraview_compute_fluxes.py"
+    output:
+        vtu="{postprocessing_folder}/{case}/with_additional_fields.vtu"
+    shell:
+        # The command is now clean and portable. Snakemake finds pvpython
+        # from the activated Conda environment.
+        "pvpython {input.script} {input.yml} {input.pvd} {output.vtu}"
+
+rule extract_line:
+    input:
+        yml=f"{raw_data}/{{case}}/parameters.yml",
+        vtu="{postprocessing_folder}/{case}/with_additional_fields.vtu",
+        script=lambda wildcards: f"{scripts_dir}/postprocessing/paraview_extract_{wildcards.extraction}.py"
+    output:
+        csv="{postprocessing_folder}/{case}/extract_{extraction}.csv"
+    shell:
+        # This command is also clean and portable.
+        "pvpython {input.script} {input.yml} {input.vtu} {output.csv}"

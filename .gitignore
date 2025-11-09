@@ -17,3 +17,7 @@ figure/
 2025*/**
 *.yml
 *.sh
+
+# we don't want to ignore input filers
+!simulation_inputs/**/input.yml
+!simulation_inputs/**/parameters.yml

@@ -2,12 +2,13 @@ configfile: "snakemake_config.yml"
 
 from pathlib import Path
 
-
 raw_data = config["RAW_DATA"]
 # Get a list of folder names in 'raw_data/' directory
 cases = [p.name for p in Path(raw_data).iterdir() if p.is_dir()]
 
 postprocessing_folder = config["POSTPROCESSING_DATA"]
+SCRIPTS_DIR = config["SCRIPTS_DIR"]           # Holds "scripts/postprocessing"
+
 
 rule all:
     input:
