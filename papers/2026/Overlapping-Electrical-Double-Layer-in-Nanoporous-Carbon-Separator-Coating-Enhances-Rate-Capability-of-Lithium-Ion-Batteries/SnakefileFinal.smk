@@ -39,7 +39,11 @@ rule compute_additional_flux_fields:
     shell:
         # The command is now clean and portable. Snakemake finds pvpython
         # from the activated Conda environment.
-        "pvpython {input.script} {input.yml} {input.pvd} {output.vtu}"
+        #"pvpython {input.script} {input.yml} {input.pvd} {output.vtu}"
+        """
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env {input.script} {input.yml} {input.pvd} {output.vtu}
+        """
 
 rule extract_line:
     input:
@@ -50,4 +54,8 @@ rule extract_line:
         csv="{postprocessing_folder}/{case}/extract_{extraction}.csv"
     shell:
         # This command is also clean and portable.
-        "pvpython {input.script} {input.yml} {input.vtu} {output.csv}"
+        # "pvpython {input.script} {input.yml} {input.vtu} {output.csv}"
+        """
+        export PATH=/Applications/ParaView-5.13.2.app/Contents/bin:$PATH
+        pvpython --venv /Users/nik/.pyenv/versions/paraview_3.10_env {input.script} {input.yml} {input.vtu} {output.csv}
+        """
