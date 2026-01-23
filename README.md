@@ -2,7 +2,6 @@
 
 <!-- [![DOI](https://zenodo.org/badge/DOI.svg)](https://doi.org/your-doi)  -->
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
-[![Python Version](https://img.shields.io/badge/python-3.10.16%2B-blue)](#prerequisites)  
 
 ## **Overview**
 This repository contains the source code for the research project **"[Your Research Paper Title]"**, which was published in **[Journal/Conference Name]**. The code is designed to **[briefly describe functionality, e.g., numerical simulations, data processing, machine learning, etc.]**.
