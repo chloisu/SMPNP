@@ -1,0 +1,105 @@
+case: "20251219_r32_nm_h32nm_l50nm"
+pnp_type: "SMPNP"
+species_parameters:
+  species:
+    - 2
+    - 3
+  solvent_size: 9.1e-10
+  ion_sizes:
+    - 8.4e-10
+    - 5.3e-10
+  diffusivities:
+    - 2.0e-11
+    - 2.0e-11
+  epsilon_r: 40.6
+grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
+grid:
+  equally_spaced_1d:
+    pore_radius: 1.0e-8
+    grid_size: 0.001
+  nano_slit_with_reservoirs_2d:
+    pore_radius: 1.0e-8
+    pore_length: 5.0e-8
+    reservoir_height: 8.0e-8
+  aligned_nano_slit_with_reservoirs_2d:
+    pore_radius: 1.0e-8
+    pore_length: 5.0e-8
+    reservoir_height: 8.0e-8
+  aligned_nano_slit_with_unstructured_reservoirs_2d:
+    pore_radius: 3.2e-8
+    pore_length: 5.0e-8
+    reservoir_height: 3.2e-8
+    hwall_normal: 0.0002
+    hwall_tangential: 0.002
+    hcenterline: 0.01
+    maxvolume: 0.0001
+  partially_aligned_nano_slit_with_rest_unstructured_and_unstructured_reservoirs_2d:
+    pore_radius: 1.0e-8
+    pore_length: 5.0e-8
+    reservoir_height: 8.0e-8
+    width_of_structured_region: 2.0e-8
+    hwall_normal: 0.0002
+    hwall_tangential: 0.002
+    hcenterline: 0.01
+    maxvolume: 0.0001
+    areacontrol: 0.0005
+output_directory: "20251219_r32_nm_h32nm_l50nm"
+non_dim:
+  L_REF: 5.0e-8
+  C_REF: 6.0221407599999996e26
+  D_REF: 5.0e-9
+  PHI_REF: 0.02526449777465668
+  EPSILON_REF: 7.08335025504e-10
+boundary_conditions:
+  dirichlet:
+    species:
+      - 1
+      - 2
+      - 3
+    boundary_indices:
+      -
+        - 5
+        - 1
+      -
+        - 5
+      -
+        - 5
+        - 9
+    boundary_values:
+      -
+        - 0.0
+        - 16.0
+      -
+        - 1.0
+      -
+        - 1.0
+        - 1.1
+  neumann:
+    species: []
+    boundary_indices: []
+    boundary_values: []
+initial_conditions:
+  species:
+    - 1
+    - 2
+    - 3
+  values:
+    - 0.0
+    - 1.0
+    - 1.0
+solver_parameters:
+  verbose: true
+  abstol: 1.0e-6
+  reltol: 1.0e-10
+  maxiters: 5
+  reltol_linear: 1.0e-8
+  abstol_linear: 1.0e-8
+  method_linear: ~
+time_parameters:
+  solve_to_steady_state: true
+  steady_state_tol: 1.0e-7
+  minimum_steady_state_time: 1.0
+  final_time: 1000.0
+  max_timestep: 5.0e-6
+  initial_timestep: 1.0e-12
+  plot_time_interval: 5.0e-6

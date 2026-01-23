@@ -7,7 +7,7 @@
 *.csv
 test*.jl
 *.python-version
-*.svg
+.svg
 scratch.jl
 output**/**
 **/output**/**
@@ -17,7 +17,7 @@ figure/
 2025*/**
 *.yml
 *.sh
-
-# we don't want to ignore input filers
-!simulation_inputs/**/input.yml
-!simulation_inputs/**/parameters.yml
+# don't ignore input files of the individual papers
+# 2026
+!papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/input_files/simulation_inputs/**/input.yml
+!papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/input_files/simulation_inputs/**/parameters.yml

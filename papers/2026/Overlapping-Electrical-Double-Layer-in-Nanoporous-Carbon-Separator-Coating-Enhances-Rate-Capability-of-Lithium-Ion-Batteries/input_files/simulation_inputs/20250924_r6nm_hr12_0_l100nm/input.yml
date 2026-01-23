@@ -1,0 +1,30 @@
+case: "20250924_r6nm_hr12_0_l100nm"
+output_directory: "20250924_r6nm_hr12_0_l100nm"
+grid_type: "aligned_nano_slit_with_unstructured_reservoirs_2d"
+pnp_type : "SMPNP"
+
+grid:
+  aligned_nano_slit_with_unstructured_reservoirs_2d:
+    pore_radius : 6e-9
+    pore_length : 100e-9
+    reservoir_height: 7.20e-08
+
+non_dim:
+    L_REF : 100e-9
+
+species_parameters:
+  species : [2,3]
+  solvent_size : 9.1e-10
+  ion_sizes : [8.4e-10,5.3e-10]
+  diffusivities : [2e-11,2e-11]
+  epsilon_r : 40.6
+
+boundary_conditions:
+  dirichlet:
+    species : [1,2,3]
+    boundary_indices : [[5],[5,9],[5,9]]
+    boundary_values : [[0.0],[1.0,1.1],[1.0,1.1]]
+
+time_parameters:
+  plot_time_interval : 0.01
+  max_timestep: 0.01
