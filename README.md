@@ -63,7 +63,7 @@ $$\frac{\partial c_i}{\partial t} = \nabla \cdot (M_i c_i \nabla \mu_i)\\
 \nabla^2\phi= -\frac{1}{\varepsilon}\sum_{j = 1}^{2} z_jec_j,
 $$
 
-where $i = 1,2 = \text{Li}^+,\text{PF}_6^-$, $c_i$ is the concentration (mol/m$^3$) of the $i^{\text{th}}$ ion, $t$ is time (s), $M_i = D_i/(k_{\text{B}}T)$ is the ion mobility (m$^2$/(Js)) where $D_i$ is the diffusion coefficient (m$^2$/s), $k_B$ is the Boltzmann constant, $T$ is the temperature (K), $\varepsilon$ is the permittivity (F/m), $\phi$ is the electric potential (V) and $\mu_i$ (J) that accounts for the ion size effect is given by 
+where $`i = 1,2 = {\text{Li}}^+,{\text{PF}}_6^-`$, $c_i$ is the concentration (mol/m$^3$) of the $i^{\text{th}}$ ion, $t$ is time (s), $M_i = D_i/(k_{\text{B}}T)$ is the ion mobility (m$^2$/(Js)) where $D_i$ is the diffusion coefficient (m$^2$/s), $k_B$ is the Boltzmann constant, $T$ is the temperature (K), $\varepsilon$ is the permittivity (F/m), $\phi$ is the electric potential (V) and $\mu_i$ (J) that accounts for the ion size effect is given by 
 
 $$
 \mu_i = k_{\text{B}}T \ln(c_ia_i^3) -\frac{k_{\text{B}}T a_i^3}{a_0^3}\ln\left(1-\sum_{j=1}^{2}c_ja_j^3\right) + z_ie\phi,
