@@ -4,12 +4,10 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 
 ## **Overview**
-This repository contains the source code for the research project **"[Your Research Paper Title]"**, which was published in **[Journal/Conference Name]**. The code is designed to **[briefly describe functionality, e.g., numerical simulations, data processing, machine learning, etc.]**.
+This repository contains the source code for the research project **Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries**, which was published in **Advanced Materials**. The code refers to the numerical simulation portion of the manuscript. Specifically, it **solves a generalized Poisson Nernst Planck system in a two-dimensional nanoslit geometry using the VoronoiFVM.jl package.**
 
 \ud83d\udcdd **Paper DOI**: [Insert DOI]  
 \ud83d\udcc1 **Data DOI (if available)**: [Insert DOI for dataset]  
-\ud83d\udd17 **Project Website (if applicable)**: [Insert link]  
-
 ---
 
 ## **Installation**
@@ -60,18 +58,15 @@ $$c_+ \quad \text{concentration of cations}$$
 $$\phi \quad \text{electrical potential}$$
 
 ### **Non-dimensionalization**
-The variables in governing equations are dimensionless. They are made non-dimensional by the following scalings wich can also be found in[^bazant_lecture_notes]
-
-$$
-    \tilde{\mathbf{x}} = \frac{\mathbf{x}}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{\text{ref}}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{\text{ref}}},\quad \tilde{D_i} = \frac{D_i}{D_{\text{ref}}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\mathbf{\nabla}} = L\mathbf{\nabla}
+The variables in governing equations are dimensionless. They are made non-dimensional by the following scalings wich can also be found in [^bazant_lecture_notes]
+$$\tilde{\mathbf{x}}$$
+$$\tilde{\mathbf{x}} = \frac{\mathbf{x}}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{\text{ref}}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{\text{ref}}},\quad \tilde{D_i} = \frac{D_i}{D_{\text{ref}}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\mathbf{\nabla}} = L\mathbf{\nabla}
 $$
 Here, $\mathbf{x} = (x,y)^T$ is the two-dimensional space vector, $L$ (\unit[per-mode = symbol]{\meter}) is a chosen reference length of the system, $c_{\text{ref}}$, $D_{\text{ref}}$, $\varepsilon_{\text{ref}}$ are reference scales for concentration, diffusion coefficient and permittivity with the same units as the non-reference quantities.
 
 ### **Governing equations**
 The dimensionless governing PNP equations then read as
-$$
-
-    \frac{\partial \tilde{c}_i}{\partial \tilde{t}} = \tilde{\nabla} \cdot (\tilde{D}_i \tilde{c}_i \tilde{\nabla} \tilde{\mu}_i)\\
+$$\frac{\partial \tilde{c}_i}{\partial \tilde{t}} = \tilde{\nabla} \cdot (\tilde{D}_i \tilde{c}_i \tilde{\nabla} \tilde{\mu}_i)\\
  \tilde{\lambda}_D^2\tilde{\nabla}^2\tilde{\phi}= -\frac{4\pi}{\tilde{\varepsilon}}\sum_j z_j\tilde{c_j}
 $$
 
@@ -167,7 +162,7 @@ or:
 ---
 
 ## **License**
-This project is licensed under the **[License Name]**. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ## **Contact**
 For questions or collaboration inquiries, please contact:
