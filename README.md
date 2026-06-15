@@ -50,7 +50,7 @@ docker run --rm -it my_project
 ---
 
 
-## **Governing equations & numerics**
+## **Governing equations**
 ### **Primary variables**
 The code solves the coupled Poisson-Nernst-Planck equations for the following quantities:
 $$c_- \quad \text{concentration of anions}$$
@@ -113,7 +113,7 @@ $$c_\pm(x) = \exp\left(\mp \phi(x)\right)$$
 
 
 
-## Concentration distribution in a size-modified case (dirichlet)
+### Semi-analytical concentration distribution in a size-modified case (dirichlet)
 For the case with finite ion sizes, we setup a first test case that still uses the dirichlet boundary conditions for potential and concentration at $x = 1$. The chosen boundary conditions for this case are given as 
 
 $$\phi = \tilde{\phi}_{\text{wall}}, J_+ = J_-= 0\qquad \text{at } x = 0$$
@@ -122,7 +122,7 @@ $$\phi = 0, c_+ = c_-= 1\qquad \text{at } x = 1$$
 
 which are the same boundary conditions as for the simple PNP case above. The difference here is that we now solve the size-modified PNP equations that take the finite ion sizes into account. These ion sizes are given as
 
-$$a_+ = a_- = a_0 = 5Angstrom$$
+$$a_+ = a_- = a_0 = 5A$$
 
 All other parameter can be found in the [input file](./test/verification_finite_size_pnp_dirichlet.yml) for that test case.
 
@@ -140,31 +140,19 @@ $$\zeta_\pm^L = c_\pm^L m_\pm \qquad c_\pm^L = c_\pm(x = L)$$
 
 $$\phi^L = \phi(x = L)$$
 
-## Concentration distribution in a size-modified case (channel)
-
 ## **Usage**
-### **Running the main script**
+### **Running a simulation**
 ```sh
 julia --project=. ./src/smpnp.jl input.yml
 ```
-**Arguments:**
-- `--paramaters` or `-p`: Path to the input data file.
-- `--help` or `-h`: Display help information
+Replace `input.yml` with your own input file. For examples of input files, refer to the `test/` or the `papers/` folder.
 
-### **Example**
-```sh
-python src/main.py --input data/example.csv --output results/processed.csv
-```
+### **Results & Output**
+The code write the output files of the simulation to the specified output directory in the input file.
 
----
+### **Postprocessing & Figures**
+For postprocessing and figures of the simulations, please refer to the `README.md` file of the specific paper in the `papers/` folder.
 
-## **Results & Output**
-This code generates:
-- **Processed data:** Stored in `results/`
-- **Figures & plots:** Saved as `.png` files
-- **Log files:** Stored in `logs/` (if applicable)
-
----
 
 ## **Citation**
 If you use this code in your research, please cite:
@@ -194,9 +182,8 @@ For questions or collaboration inquiries, please contact:
 * Niklaus M. Leuenberger,  
 Stanford University, [Department of Energy Science & Engineering](https://ese.stanford.edu/)  
 Green Earth Sciences Bldg. Rm 151  
-367 Panama Street, Stanford, CA 94305, U.S.A  
-[niklausl@stanford.edu](mailto:niklausl@stanford.edu)
- 
+367 Panama Street, Stanford, CA 94305, U.S.A
+
 ## **References**
 
 [^bazant_lecture_notes]: Lecture Notes [MIT-10.626 Lecture notes](https://ocw.mit.edu/courses/10-626-electrochemical-energy-systems-spring-2014/34aaca3a97887695dd295db7cc0fa3c0_MIT10_626S14_S11lec24.pdf)
