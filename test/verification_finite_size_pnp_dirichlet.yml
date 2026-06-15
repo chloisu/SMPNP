@@ -25,3 +25,6 @@ boundary_conditions:
 time_parameters:
   
   final_time : 1e-3
+
+initial_conditions:
+  initialize_concentration_gradient : False

@@ -8,6 +8,8 @@
 @option struct InitialConditions
     species::Vector{Int} = Vector{Int}(1:NUM_SPECIES) # initial species
     values::Vector{Float64} = DEFAULT_INITIAL_CONDITIONS # initial conditions to apply
+    initialize_concentration_gradient::Bool = true # initialize the concentrations with a specific hard-coded linear profile
+                                                   # used in the simulations for the first paper.
 end
 
 function validate_initial_conditions(params)
@@ -43,7 +45,11 @@ function apply_initial_condition_for_time_dependent!(sys, parameters, potential_
         if species == PHI_EQ
             inival[PHI_EQ, :] = potential_from_initial_timestep
         else
-            inival[species, :] .= map((x, y) -> 1.0 + 0.1 / 3 * x, sys.grid)#map(x -> 1.1 - 0.1 / 3 * x, sys.grid)#initial_condition_parameters.values[species]
+            if initial_condition_parameters.initialize_concentration_gradient
+                inival[species, :] .= map((x, y) -> 1.0 + 0.1 / 3 * x, sys.grid)#map(x -> 1.1 - 0.1 / 3 * x, sys.grid)#initial_condition_parameters.values[species]
+            else
+                inival[species, :] .= initial_condition_parameters.values[species]
+            end
         end
     end
     return inival

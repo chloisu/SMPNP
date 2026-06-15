@@ -28,3 +28,5 @@ boundary_conditions:
     # the Neumann value is not simply dphi/dx but actually -prefactor*dphi/dx where the prefactor is given from the
     # physics module. 
 
+initial_conditions:
+  initialize_concentration_gradient : False
