@@ -59,8 +59,11 @@ $$\phi \quad \text{electrical potential}$$
 
 ### **Non-dimensionalization**
 The variables in governing equations are dimensionless. They are made non-dimensional by the following scalings wich can also be found in [^bazant_lecture_notes]
-$$\tilde{\mathbf{x}}$$
-$$\tilde{\mathbf{x}} = \frac{\mathbf{x}}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{\text{ref}}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{\text{ref}}},\quad \tilde{D_i} = \frac{D_i}{D_{\text{ref}}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\mathbf{\nabla}} = L\mathbf{\nabla}
+
+$$
+
+\tilde{\mathbf{x}} = \frac{\mathbf{x}}{L}, \quad \tilde{c_i} = \frac{c_i}{c_{\text{ref}}}, \quad \tilde{\varepsilon} = \frac{\varepsilon}{\varepsilon_{\text{ref}}},\quad \tilde{D_i} = \frac{D_i}{D_{\text{ref}}}, \quad \tilde{t} =\frac{t}{\left(L^2/D\right)},\quad \tilde{\phi} = \frac{e\phi}{k_BT}, \tilde{\mathbf{\nabla}} = L\mathbf{\nabla}
+
 $$
 Here, $\mathbf{x} = (x,y)^T$ is the two-dimensional space vector, $L$ (\unit[per-mode = symbol]{\meter}) is a chosen reference length of the system, $c_{\text{ref}}$, $D_{\text{ref}}$, $\varepsilon_{\text{ref}}$ are reference scales for concentration, diffusion coefficient and permittivity with the same units as the non-reference quantities.
 
