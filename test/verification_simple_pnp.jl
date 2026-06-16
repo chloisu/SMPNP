@@ -1,6 +1,6 @@
 include("../src/smpnp.jl")
 include("analytical_solutions.jl")
-using GLMakie
+using CairoMakie
 # This setup was generated with the help of ChatGPT (OpenAI).
 # now that we have main available, lets run it and get the steady state solution
 global ARGS = ["verification_simple_pnp.yml"]  # Simulate command-line arguments
@@ -14,7 +14,7 @@ phi_analytical = potential_pb_1d_v2(grid, 0.3, 10e-9)
 ca_analytical, cc_analytical = concentrations_pb_1d(grid, 0.3, 10e-9)
 
 p = GridVisualizer(;
-    Plotter=GLMakie,
+    Plotter=CairoMakie,
     layout=(3, 1))
 scalarplot!(p[1, 1], grid, phi_analytical, clear=false, show=true)
 scalarplot!(p[1, 1], grid, phi_numerical, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
@@ -25,4 +25,4 @@ scalarplot!(p[2, 1], grid, ca_numerical, clear=false, show=true, linestyle=:dash
 scalarplot!(p[3, 1], grid, cc_analytical, clear=false, show=true)
 scalarplot!(p[3, 1], grid, cc_numerical, clear=false, show=true, linestyle=:dash, color=(1, 0, 0))
 
-GLMakie.save(joinpath(".", "verification_simple_pnp.jpg"), reveal(p))  #hide
+CairoMakie.save(joinpath(".", "verification_simple_pnp.pdf"), reveal(p))  #hide

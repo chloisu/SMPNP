@@ -1,7 +1,7 @@
 include("../src/smpnp.jl")
 include("analytical_solutions.jl")
 include("helpers.jl")
-using GLMakie
+using CairoMakie
 # This setup was generated with the help of ChatGPT (OpenAI).
 # now that we have main available, lets run it and get the steady state solution
 global ARGS = ["verification_simple_pnp_dimensional_residual_check.yml"]  # Simulate command-line arguments
@@ -30,4 +30,4 @@ ax = Axis(fig[1, 1]; limits=((0, 0.5), (0, maximum(relative_error_potential_eq_r
 lines!(ax, x, relative_error_potential_eq_residual)
 # Display the figure
 display(fig)
-GLMakie.save(joinpath(".", "verification_simple_pnp_dimensional_residual_check.jpg"), fig)
+CairoMakie.save(joinpath(".", "verification_simple_pnp_dimensional_residual_check.pdf"), fig)
