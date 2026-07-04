@@ -8,7 +8,6 @@ This repository contains the source code for the research project **Nanoporous C
 
 ---
 ## **Installation**
-To be completed soon.
 <!--
 ### **Prerequisites**
 Before running the code, ensure you have the following installed:
@@ -39,15 +38,24 @@ If you use `pyenv` for managing Python versions, run:
 bash pyenv_setup.sh
 pyenv activate my_project_env
 ```
+-->
+### **Container**
+The easiest way to install all dependencies is to build the container defined by the provided
+docker file. (Note! The dockerfile was generated using Claude Opus 4.7)
 
-#### **Using Docker (optional)**
-For reproducibility, you can use the provided Docker container:
+#### **Using Docker**
 ```sh
 docker build -t my_project .
-docker run --rm -it my_project
+docker run -it --rm -v "$(pwd):/work" myproject:latest
+```
+
+#### **Using Apptainer**
+```sh
+apptainer build app.sif apptainer.def
+apptainer shell app.sif
 ```
 ---
--->
+
 ## **Governing equations**
 ### **Primary variables**
 The code solves the coupled Poisson-Nernst-Planck equations for the following quantities:

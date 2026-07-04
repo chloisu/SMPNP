@@ -25,7 +25,12 @@
 
 
 ## Usage
-1. Make sure the `./data/raw_simulation_outputs/` folder is present.
+1. Make sure the `./data/raw_simulation_outputs/` folder is present. If it is not, please contact
+   Nik Leuenberger to obtain a copy of the `./data/raw_simulation_outputs/` folder.
+   - Niklaus M. Leuenberger,  
+    Stanford University, [Department of Energy Science & Engineering](https://ese.stanford.edu/)  
+    Green Earth Sciences Bldg. Rm 151  
+    367 Panama Street, Stanford, CA 94305, U.S.A
    
 2. Run snakemake from the top of the repository as follows
 ```

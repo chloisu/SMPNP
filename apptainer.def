@@ -1,0 +1,156 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+# ---------------------------------------------------------------------------
+# Native Apptainer build of a mixed Julia + Python (Snakemake) codebase.
+#
+# Build (from the directory containing this file, requirements.txt,
+# Project.toml and Manifest.toml):
+#
+#   apptainer build --fakeroot app.sif apptainer.def
+#
+# On an HPC cluster where --fakeroot is not permitted, use the remote builder:
+#
+#   apptainer build --remote app.sif apptainer.def
+#
+# For an explicit x86_64 image on an ARM build host:
+#
+#   apptainer build --fakeroot --arch amd64 app.sif apptainer.def
+#
+# Notes vs. the Docker build:
+#   * %files sources are resolved relative to the build's working directory.
+#   * /tmp is overmounted during %post, so files are staged under /opt instead.
+#   * The Julia instantiate step is written to a script file rather than passed
+#     inline via `julia -e`, to avoid shell quoting/continuation issues.
+# ---------------------------------------------------------------------------
+
+%files
+    requirements.txt /opt/requirements.txt
+    Project.toml     /opt/project/Project.toml
+    Manifest.toml    /opt/project/Manifest.toml
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export LANG=C.UTF-8
+    export LC_ALL=C.UTF-8
+    export TZ=Etc/UTC
+    export JULIA_PATH=/opt/julia
+    export CONDA_DIR=/opt/conda
+    export PATH=/opt/conda/envs/app/bin:/opt/conda/bin:/opt/julia/bin:$PATH
+    export CONDA_DEFAULT_ENV=app
+    # Prepend the user's writable ~/.julia so the pre-instantiated depot at
+    # /opt/julia-depot stays effectively read-only at runtime.
+    export JULIA_DEPOT_PATH=":/opt/julia-depot"
+    export JULIA_PROJECT=/opt/project
+    export JULIA_NUM_THREADS=auto
+
+%post
+    set -eu
+    export DEBIAN_FRONTEND=noninteractive
+
+    # -----------------------------------------------------------------------
+    # System packages
+    #   OpenGL / X11 / xkbcommon  -> GLMakie and Gmsh GUI
+    #   Xvfb                      -> virtual GL context during Julia precompile
+    #   libgomp                   -> OpenMP runtime for SciML / sparse JLLs
+    # libquadmath0 is intentionally omitted (x86-only; JLLs bundle their own).
+    # -----------------------------------------------------------------------
+    apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl wget bzip2 xz-utils tar unzip git \
+        build-essential \
+        locales tzdata \
+        xvfb \
+        libgl1 libglu1-mesa libglx-mesa0 libegl1 libgles2 \
+        libglvnd0 libglx0 libopengl0 \
+        libxrandr2 libxinerama1 libxcursor1 libxi6 libxext6 \
+        libxrender1 libxfixes3 libxft2 libxt6 libxkbcommon0 libxkbcommon-x11-0 \
+        libxcb1 libxcb-glx0 libxcb-render0 libxcb-shm0 libxcb-xkb1 \
+        libsm6 libice6 \
+        libgomp1 libfontconfig1 libfreetype6 \
+        libpng16-16 libjpeg-turbo8 libtiff5
+    locale-gen en_US.UTF-8
+    rm -rf /var/lib/apt/lists/*
+
+    # -----------------------------------------------------------------------
+    # Julia (matches the version recorded in Manifest.toml). Multi-arch.
+    # -----------------------------------------------------------------------
+    JULIA_VERSION=1.11.3
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)  JL_PATH_ARCH=x64;     JL_FILE_ARCH=x86_64  ;;
+        aarch64) JL_PATH_ARCH=aarch64; JL_FILE_ARCH=aarch64 ;;
+        *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+    esac
+    JULIA_MM="${JULIA_VERSION%.*}"
+    mkdir -p /opt/julia
+    curl -fsSL "https://julialang-s3.julialang.org/bin/linux/${JL_PATH_ARCH}/${JULIA_MM}/julia-${JULIA_VERSION}-linux-${JL_FILE_ARCH}.tar.gz" \
+        | tar -xz -C /opt/julia --strip-components=1
+    /opt/julia/bin/julia --version
+
+    # -----------------------------------------------------------------------
+    # Miniforge (conda + mamba). Multi-arch installer.
+    # -----------------------------------------------------------------------
+    MINIFORGE_VERSION=24.11.3-0
+    curl -fsSL -o /opt/miniforge.sh \
+        "https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-${ARCH}.sh"
+    bash /opt/miniforge.sh -b -p /opt/conda
+    rm /opt/miniforge.sh
+    /opt/conda/bin/conda config --system --set always_yes yes
+    /opt/conda/bin/conda config --system --set auto_update_conda false
+    /opt/conda/bin/conda clean -afy
+
+    # -----------------------------------------------------------------------
+    # Python environment (conda env "app", pip-installed from requirements).
+    # Staged under /opt because /tmp is overmounted during %post.
+    # -----------------------------------------------------------------------
+    PYTHON_VERSION=3.11
+    /opt/conda/bin/mamba create -n app -y -c conda-forge python=${PYTHON_VERSION} pip
+    /opt/conda/envs/app/bin/pip install --no-cache-dir -r /opt/requirements.txt
+    /opt/conda/bin/conda clean -afy
+
+    # -----------------------------------------------------------------------
+    # Julia project: instantiate + precompile.
+    # Precompile is best-effort: Metal.jl is macOS-only and fails on Linux;
+    # Pkg.precompile continues past per-package errors, which we swallow.
+    # Xvfb provides GLMakie a virtual display for its precompile-time context.
+    #
+    # The Julia code is written to a script file (not passed via `julia -e`)
+    # to avoid shell quoting / line-continuation breakage inside %post.
+    # -----------------------------------------------------------------------
+    export JULIA_DEPOT_PATH=/opt/julia-depot
+    mkdir -p /opt/julia-depot /opt/project
+
+    cat > /opt/instantiate.jl << 'EOF'
+using Pkg
+Pkg.instantiate()
+try
+    Pkg.precompile()
+catch e
+    @warn "Pkg.precompile finished with errors (expected for Metal.jl on Linux)" exception=(e, catch_backtrace())
+end
+EOF
+
+    xvfb-run -a /opt/julia/bin/julia --project=/opt/project /opt/instantiate.jl
+
+    chmod -R a+rX /opt/julia-depot /opt/project
+
+%runscript
+    exec /bin/bash -l "$@"
+
+%labels
+    Description "Julia + Python (Snakemake) container for HPC"
+    JuliaVersion 1.11.3
+    PythonVersion 3.11
+
+%help
+    Mixed Julia + Python (Snakemake) environment.
+
+    Run an interactive login shell:
+        apptainer shell app.sif
+    or:
+        apptainer run app.sif
+
+    Both julia and python are on PATH; python resolves to the conda
+    "app" environment by default. Bind-mount your working directory as needed,
+    for example:
+        apptainer shell --bind "$PWD":/work app.sif
