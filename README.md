@@ -41,7 +41,7 @@ pyenv activate my_project_env
 -->
 ### **Container**
 The easiest way to install all dependencies is to build the container defined by the provided
-docker file. (Note! The dockerfile was generated using Claude Opus 4.7)
+docker file. (Note! The Dockerfile and apptainer.def file were generated using [Claude](https://claude.ai/).)
 
 #### **Using Docker**
 ```sh
