@@ -5,10 +5,9 @@
 
 ## **Overview**
 This repository contains the source code for the research project **Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries**, which was published in **Advanced Materials**. The code refers to the numerical simulation portion of the manuscript. Specifically, it **solves a generalized Poisson Nernst Planck system in a two-dimensional nanoslit geometry using the VoronoiFVM.jl package.**
-
 ---
-
 ## **Installation**
+<!--
 ### **Prerequisites**
 Before running the code, ensure you have the following installed:
 - **Julia**
@@ -46,8 +45,7 @@ docker build -t my_project .
 docker run --rm -it my_project
 ```
 ---
-
-
+-->
 ## **Governing equations**
 ### **Primary variables**
 The code solves the coupled Poisson-Nernst-Planck equations for the following quantities:
@@ -156,18 +154,22 @@ For postprocessing and figures of the simulations, please refer to the `README.m
 If you use this code in your research, please cite:
 
 ```bibtex
-@article{YourName2024,
-  author  = {Your Name and Co-Authors},
-  title   = {Your Paper Title},
-  journal = {Journal Name},
-  year    = {2024},
-  volume  = {XX},
-  pages   = {XX-XX},
-  doi     = {DOI HERE}
+@article{https://doi.org/10.1002/adma.73871,
+author = {Murphy, Samuel P. and Leuenberger, Niklaus M. and Chen, Sidian and Crooks, Ellen and Jung, Min Soo and Tchelepi, Hamdi and Ji, Xiulei},
+title = {Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries},
+journal = {Advanced Materials},
+volume = {n/a},
+number = {n/a},
+pages = {e73871},
+keywords = {distribution of relaxation times, electrical double layer, Ion transport, lithium-ion batteries, nanoporous carbon, rate capability, separator coating},
+doi = {https://doi.org/10.1002/adma.73871},
+url = {https://advanced.onlinelibrary.wiley.com/doi/abs/10.1002/adma.73871},
+eprint = {https://advanced.onlinelibrary.wiley.com/doi/pdf/10.1002/adma.73871}
 }
 ```
 or:
-> Your Name et al., *Your Paper Title*, in **Journal Name**, 2024. DOI: [Insert DOI].
+
+S. P. Murphy, N. M. Leuenberger, S. Chen, et al. “Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries.” Advanced Materials (2026): e73871. https://doi.org/10.1002/adma.73871
 
 ---
 
