@@ -5,8 +5,10 @@
 
 ## **Overview**
 This repository contains the source code for the research project **Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries**, which was published in **Advanced Materials**. The code refers to the numerical simulation portion of the manuscript. Specifically, it **solves a generalized Poisson Nernst Planck system in a two-dimensional nanoslit geometry using the VoronoiFVM.jl package.**
+
 ---
 ## **Installation**
+To be completed soon.
 <!--
 ### **Prerequisites**
 Before running the code, ensure you have the following installed:
