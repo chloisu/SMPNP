@@ -1,13 +1,11 @@
 # **SMPNP - a size modified Poisson Nernst Planck simulation tool**
 
-<!-- [![DOI](https://zenodo.org/badge/DOI.svg)](https://doi.org/your-doi)  -->
+[![DOI](https://zenodo.org/badge/DOI.svg)](https://doi.org/10.1002/adma.73871)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 
 ## **Overview**
 This repository contains the source code for the research project **Nanoporous Carbon Coating of Separator Boosts Rate Capability of Cathodes in Lithium-Ion Batteries**, which was published in **Advanced Materials**. The code refers to the numerical simulation portion of the manuscript. Specifically, it **solves a generalized Poisson Nernst Planck system in a two-dimensional nanoslit geometry using the VoronoiFVM.jl package.**
 
-\ud83d\udcdd **Paper DOI**: [Insert DOI]  
-\ud83d\udcc1 **Data DOI (if available)**: [Insert DOI for dataset]  
 ---
 
 ## **Installation**
