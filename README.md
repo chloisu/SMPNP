@@ -148,6 +148,7 @@ $$\phi^L = \phi(x = L)$$
 
 ## **Usage**
 ### **Running a simulation**
+For the following commands, the easiest way to run them is to use a container as shown above in [installation](#installation) section above.
 ```sh
 julia --project=. ./src/smpnp.jl input.yml
 ```

@@ -31,8 +31,10 @@
     Stanford University, [Department of Energy Science & Engineering](https://ese.stanford.edu/)  
     Green Earth Sciences Bldg. Rm 151  
     367 Panama Street, Stanford, CA 94305, U.S.A
-   
-2. Run snakemake from the top of the repository as follows
+
+2. For the following steps, the easiest way to run them is to use a container as shown in the installation section of the top-level README.md.
+
+3. Run snakemake from the top of the repository as follows
 ```
 snakemake -n --snakefile ./papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/SnakefileFinal.smk
 ```
@@ -43,4 +45,4 @@ snakemake --snakefile ./papers/2026/Overlapping-Electrical-Double-Layer-in-Nanop
 ```
 where the number of cores can be changed and with all the additional desired [Snakemake](https://snakemake.readthedocs.io/en/stable/executing/cli.html) arguments to extract the data from the raw simulation data.
 
-3. Adjust the `FOLDER` and `OUTPUT_FOLDER` paths in `./scripts/plot/figures.ipynb` to generate the figures based on the postprocessed data.
+4. Adjust the `FOLDER` and `OUTPUT_FOLDER` paths in `./scripts/plot/figures.ipynb` to generate the figures based on the postprocessed data.
