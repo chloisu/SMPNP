@@ -1,6 +1,6 @@
 # **SMPNP - a size modified Poisson Nernst Planck simulation tool**
 
-[![DOI](https://zenodo.org/badge/DOI.svg)](https://doi.org/10.1002/adma.73871)
+[![DOI](https://img.shields.io/badge/DOI-10.1002/adma.73871-blue)](https://doi.org/10.1002/adma.73871)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 
 ## **Overview**
@@ -185,6 +185,9 @@ S. P. Murphy, N. M. Leuenberger, S. Chen, et al. “Nanoporous Carbon Coating of
 
 ## **License**
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+## **Authors**
+The code was developed and implemented by Niklaus M. Leuenberger and Sidian Chen at the [Department of Energy Science & Engineering](https://ese.stanford.edu/) at Stanford.
 
 ## **Contact**
 For questions or collaboration inquiries, please contact:
