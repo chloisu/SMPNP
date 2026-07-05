@@ -188,7 +188,7 @@ S. P. Murphy, N. M. Leuenberger, S. Chen, et al. “Nanoporous Carbon Coating of
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ## **Authors**
-The code was developed and implemented by Niklaus M. Leuenberger and Sidian Chen at the [Department of Energy Science & Engineering](https://ese.stanford.edu/) at Stanford.
+The code was developed and implemented by Niklaus M. Leuenberger, Sidian Chen and Hamdi Tchelepi at the [Department of Energy Science & Engineering](https://ese.stanford.edu/) at Stanford.
 
 ## **Contact**
 For questions or collaboration inquiries, please contact:
