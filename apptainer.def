@@ -2,7 +2,9 @@ Bootstrap: docker
 From: ubuntu:22.04
 
 # ---------------------------------------------------------------------------
-# Native Apptainer build of a mixed Julia + Python (Snakemake) codebase.
+# Native Apptainer build of a mixed Julia + Python (Snakemake) codebase,
+# plus a headless ParaView (pvpython/pvbatch, OSMesa software rendering) for
+# post-processing.
 #
 # Build (from the directory containing this file, requirements.txt,
 # Project.toml and Manifest.toml):
@@ -43,6 +45,12 @@ From: ubuntu:22.04
     export JULIA_DEPOT_PATH=":/opt/julia-depot"
     export JULIA_PROJECT=/opt/project
     export JULIA_NUM_THREADS=auto
+    # Portable handle for the Snakefile: it reads PVPYTHON / PVPYTHON_ARGS from
+    # the environment, so no ParaView paths are hardcoded in the workflow.
+    # --force-offscreen-rendering makes pvpython render without a display.
+    export PVPYTHON=/opt/conda/envs/pv/bin/pvpython
+    export PVPYTHON_ARGS=--force-offscreen-rendering
+    export LIBGL_ALWAYS_SOFTWARE=1
 
 %post
     set -eu
@@ -109,6 +117,22 @@ From: ubuntu:22.04
     /opt/conda/bin/conda clean -afy
 
     # -----------------------------------------------------------------------
+    # Headless ParaView environment (conda env "pv").
+    #   mesalib -> selects the OSMesa-capable ParaView/VTK build for software
+    #   (CPU) offscreen rendering, with no display or GPU. pvpython ends up at
+    #   /opt/conda/envs/pv/bin/pvpython and uses this env's Python, so anything
+    #   installed here is importable by your scripts. Add every module your
+    #   paraview_*.py scripts import (numpy, pyyaml, ...). Pin PARAVIEW_VERSION
+    #   to match the version your scripts target; relax to just `paraview` if
+    #   conda-forge has no matching build for your platform.
+    # -----------------------------------------------------------------------
+    PARAVIEW_VERSION=5.13
+    /opt/conda/bin/mamba create -n pv -y -c conda-forge \
+        "paraview=${PARAVIEW_VERSION}" mesalib \
+        numpy pyyaml
+    /opt/conda/bin/conda clean -afy
+
+    # -----------------------------------------------------------------------
     # Julia project: instantiate + precompile.
     # Precompile is best-effort: Metal.jl is macOS-only and fails on Linux;
     # Pkg.precompile continues past per-package errors, which we swallow.
@@ -138,19 +162,27 @@ EOF
     exec /bin/bash -l "$@"
 
 %labels
-    Description "Julia + Python (Snakemake) container for HPC"
+    Description "Julia + Python (Snakemake) + headless ParaView container for HPC"
     JuliaVersion 1.11.3
     PythonVersion 3.11
+    ParaViewVersion 5.13
 
 %help
-    Mixed Julia + Python (Snakemake) environment.
+    Mixed Julia + Python (Snakemake) environment with a headless ParaView.
 
     Run an interactive login shell:
         apptainer shell app.sif
     or:
         apptainer run app.sif
 
-    Both julia and python are on PATH; python resolves to the conda
-    "app" environment by default. Bind-mount your working directory as needed,
-    for example:
+    Both julia and python are on PATH; python resolves to the conda "app"
+    environment by default. Headless ParaView lives in the "pv" env; the
+    Snakefile picks it up via the PVPYTHON / PVPYTHON_ARGS environment
+    variables that are exported by this image.
+
+    Bind-mount your working directory as needed, for example:
         apptainer shell --bind "$PWD":/work app.sif
+
+    Sanity-check that ParaView imports headlessly:
+        apptainer exec app.sif /opt/conda/envs/pv/bin/pvpython \
+            --force-offscreen-rendering -c "from paraview.simple import *; print('paraview OK')"
