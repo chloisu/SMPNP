@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.6
 #
-# Container for a mixed Julia + Python (Snakemake) codebase.
+# Container for a mixed Julia + Python (Snakemake) codebase, plus a headless
+# ParaView (pvpython/pvbatch, OSMesa software rendering) for post-processing.
+#
 # Works directly with Docker, and can be consumed by Apptainer via either:
 #   apptainer build app.sif docker-daemon://<image>:<tag>     (after `docker build`)
 #   apptainer build app.sif docker://<registry>/<image>:<tag> (after `docker push`)
@@ -15,6 +17,10 @@ FROM ubuntu:22.04
 ARG JULIA_VERSION=1.11.3
 ARG MINIFORGE_VERSION=24.11.3-0
 ARG PYTHON_VERSION=3.11
+# ParaView version for the headless post-processing env. Pin to match the
+# version your pvpython scripts were written/tested against. Relax (e.g. just
+# `paraview`) if conda-forge has no matching build for your platform.
+ARG PARAVIEW_VERSION=5.13
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -88,9 +94,31 @@ RUN mamba create -n app -y -c conda-forge python=${PYTHON_VERSION} pip \
  && /opt/conda/envs/app/bin/pip install --no-cache-dir -r /tmp/requirements.txt \
  && conda clean -afy
 
+# ---------------------------------------------------------------------------
+# Headless ParaView environment (conda env "pv").
+#   - `mesalib` selects the OSMesa-capable ParaView/VTK build, enabling
+#     software (CPU) offscreen rendering with no display or GPU — required on
+#     HPC compute nodes.
+#   - pvpython lives at /opt/conda/envs/pv/bin/pvpython and uses THIS env's
+#     Python, so any package installed here is importable from your scripts.
+#   - Add every module your paraview_*.py scripts import (numpy, pyyaml, ...).
+#     If a script errors with ModuleNotFoundError, add that package here.
+# ---------------------------------------------------------------------------
+RUN mamba create -n pv -y -c conda-forge \
+        "paraview=${PARAVIEW_VERSION}" mesalib \
+        numpy pyyaml \
+ && conda clean -afy
+
 # Put the "app" env first on PATH so `python` resolves to it by default.
 ENV PATH=/opt/conda/envs/app/bin:${CONDA_DIR}/bin:${JULIA_PATH}/bin:$PATH \
     CONDA_DEFAULT_ENV=app
+
+# Portable handle for the Snakefile: it reads PVPYTHON / PVPYTHON_ARGS from the
+# environment, so no ParaView paths need to be hardcoded in the workflow.
+# --force-offscreen-rendering makes pvpython render without a window/display.
+ENV PVPYTHON=/opt/conda/envs/pv/bin/pvpython \
+    PVPYTHON_ARGS=--force-offscreen-rendering \
+    LIBGL_ALWAYS_SOFTWARE=1
 
 # ---------------------------------------------------------------------------
 # Julia project: copy Project.toml + Manifest.toml and instantiate.

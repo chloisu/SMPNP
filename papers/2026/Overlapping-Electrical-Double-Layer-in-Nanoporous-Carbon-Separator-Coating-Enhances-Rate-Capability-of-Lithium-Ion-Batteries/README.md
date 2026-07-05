@@ -39,8 +39,8 @@ snakemake -n --snakefile ./papers/2026/Overlapping-Electrical-Double-Layer-in-Na
 for a dry-run that will tell you what snakemake would do. You can then run actually run the steps using 
 
 ```
-snakemake --snakefile ./papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/SnakefileFinal.smk
+snakemake --snakefile ./papers/2026/Overlapping-Electrical-Double-Layer-in-Nanoporous-Carbon-Separator-Coating-Enhances-Rate-Capability-of-Lithium-Ion-Batteries/SnakefileFinal.smk --cores 1
 ```
-with all the additional desired [Snakemake](https://snakemake.readthedocs.io/en/stable/executing/cli.html) arguments to extract the data from the raw simulation data.
+where the number of cores can be changed and with all the additional desired [Snakemake](https://snakemake.readthedocs.io/en/stable/executing/cli.html) arguments to extract the data from the raw simulation data.
 
 3. Adjust the `FOLDER` and `OUTPUT_FOLDER` paths in `./scripts/plot/figures.ipynb` to generate the figures based on the postprocessed data.
