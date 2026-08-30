@@ -75,7 +75,7 @@ $$
 \mu_i = k_{\text{B}}T \ln(c_ia_i^3) -\frac{k_{\text{B}}T a_i^3}{a_0^3}\ln\left(1-\sum_{j=1}^{2}c_ja_j^3\right) + z_ie\phi,
 $$
 
-with $m_i = a_i^3c_{\text{ref}}$ and $m_0 = a_0^3c_{\text{ref}}$, where $a_i$ is the excluded size (m) of the $i^{\text{th}}$ ion and $a_0$ is the excluded size (m) of the solvent molecule.
+where $a_i$ is the excluded size (m) of the $i^{\text{th}}$ ion and $a_0$ is the excluded size (m) of the solvent molecule.
 
 ### **Non-dimensionalization**
 The variables in governing equations are dimensionless. They are made non-dimensional by the following scalings wich can also be found in [^bazant_lecture_notes]
@@ -94,8 +94,10 @@ $$
 where $`\tilde{\lambda}_D = \lambda_D/L_{\text{ref}}=\sqrt{\varepsilon_{\text{ref}} k_BT/(\sum_i (z_ie)^2 c_{\text{ref}})}/L_{\text{ref}}`$ is the Debye length. The relation for the chemical potential $\tilde{\mu}_i$ is given as 
 
 $$
-\tilde{\mu}_i = \ln\left(\tilde{c}_i m_i\right) - \frac{m_i}{m_0}\ln\left({1-\sum_j\tilde{c}_jm_j}\right) + z_i\tilde{\phi}.
+\tilde{\mu}_i = \ln\left(\tilde{c}_i m_i\right) - \frac{m_i}{m_0}\ln\left({1-\sum_j\tilde{c}_jm_j}\right) + z_i\tilde{\phi},
 $$
+
+with $m_i = a_i^3c_{\text{ref}}$ and $m_0 = a_0^3c_{\text{ref}}$.
 
 ## Numerics
 The dimensionless governing equations, together with the boundary conditions described in the paper, are solved until steady-state using a backward Euler finite volume method. We implemented it on top of the open-source package [VoronoiFVM.jl](https://github.com/WIAS-PDELib/VoronoiFVM.jl). The [VoronoiFVM.jl](https://github.com/WIAS-PDELib/VoronoiFVM.jl) package uses Voronoi meshes for the discretization in space and a two-point flux approximation for computing fluxes between different control volumes. The non-linear system of equations is solved with a Newton-Raphson algorithm, with the Jacobian being computed using automatic differentiation.
@@ -197,6 +199,7 @@ For questions or collaboration inquiries, please contact:
 Stanford University, [Department of Energy Science & Engineering](https://ese.stanford.edu/)  
 Green Earth Sciences Bldg. Rm 151  
 367 Panama Street, Stanford, CA 94305, U.S.A
+[niklausl@stanford.edu](mailto:niklausl@stanford.edu)
 
 ## **References**
 
